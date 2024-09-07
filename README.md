@@ -1,4 +1,4 @@
-## wails-tab
+## wails-lead-sheet
 
 ### About
 

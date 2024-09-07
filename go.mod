@@ -1,4 +1,4 @@
-module wails-tab
+module wails-lead-sheet
 
 go 1.21
 
