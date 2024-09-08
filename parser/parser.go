@@ -6,14 +6,19 @@ import (
 	"github.com/samber/lo"
 )
 
-type ParsedContent struct {
-	Lines []string
+type Line struct {
+	Text string
+	Type LineType
 }
 
-func (p *ParsedContent) ParseContent(content string) error {
-	p.Lines = lo.FilterMap(strings.Split(content, "\n"), func(s string, _ int) (string, bool) {
+type ParsedContent struct {
+	Lines []Line
+}
+
+func (p *ParsedContent) importContent(content string) error {
+	p.Lines = lo.FilterMap(strings.Split(content, "\n"), func(s string, _ int) (Line, bool) {
 		res := strings.TrimRight(s, " \t\r\n")
-		return res, len(res) > 0
+		return Line{Text: res, Type: LineTypes.TEXT}, len(res) > 0
 	})
 
 	return nil

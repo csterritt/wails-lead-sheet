@@ -1,32 +1,42 @@
 package parser
 
-import "testing"
+import (
+	"testing"
 
-func stringSlicesEqual(a, b []string) bool {
+	"github.com/samber/lo"
+)
+
+func lineSlicesEqual(a, b []Line) bool {
 	if len(a) != len(b) {
 		return false
 	}
 	for i, v := range a {
-		if v != b[i] {
+		if v.Type != b[i].Type {
+			return false
+		}
+		if v.Text != b[i].Text {
 			return false
 		}
 	}
+
 	return true
 }
 
 func TestIgnoreNonHeader(t *testing.T) {
 	content := `
-[Section]
-   C   D   E
+[Section]   
+   C   D   E   
 Foo lyric lyric
 `
-	expected := []string{"[Section]", "   C   D   E", "Foo lyric lyric"}
+	expected := lo.Map([]string{"[Section]", "   C   D   E", "Foo lyric lyric"}, func(s string, _ int) Line {
+		return Line{Text: s, Type: LineTypes.TEXT}
+	})
 	parser := ParsedContent{}
-	err := parser.ParseContent(content)
+	err := parser.importContent(content)
 	if err != nil {
 		t.Errorf("Error parsing content: %s", err)
 	}
-	if !stringSlicesEqual(parser.Lines, expected) {
+	if !lineSlicesEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
 			expected, parser.Lines)
 	}
