@@ -44,28 +44,6 @@ func TestImportContent(t *testing.T) {
 	}
 }
 
-func xTestCategorizeLines(t *testing.T) {
-	parser := ParsedContent{}
-	err := parser.importContent(content)
-	if err != nil {
-		t.Errorf("Error parsing content: %s", err)
-	}
-	err = parser.categorizeLines()
-	if err != nil {
-		t.Errorf("Error categorizing lines: %s", err)
-	}
-
-	expected := []Line{
-		{Text: "[Section]", Type: LineTypes.SECTION},
-		{Text: "   C   D   E", Type: LineTypes.CHORDS},
-		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
-	}
-	if !lineSlicesEqual(parser.Lines, expected) {
-		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
-			expected, parser.Lines)
-	}
-}
-
 func TestAllAreChords(t *testing.T) {
 	if !allAreChords([]string{"A", "D", "G"}) {
 		t.Errorf("Chords found to not be chords")
@@ -98,5 +76,27 @@ func TestAllAreChords(t *testing.T) {
 
 	if allAreChords([]string{"Foo", "lyric", "lyric"}) {
 		t.Errorf("Non-chords found to be chords")
+	}
+}
+
+func TestCategorizeLines(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.importContent(content)
+	if err != nil {
+		t.Errorf("Error parsing content: %s", err)
+	}
+	err = parser.categorizeLines()
+	if err != nil {
+		t.Errorf("Error categorizing lines: %s", err)
+	}
+
+	expected := []Line{
+		{Text: "[Section]", Type: LineTypes.SECTION},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
+	}
+	if !lineSlicesEqual(parser.Lines, expected) {
+		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
+			expected, parser.Lines)
 	}
 }

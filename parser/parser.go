@@ -88,7 +88,10 @@ func (p *ParsedContent) categorizeLines() error {
 			continue
 		}
 
-		parts := strings.Split(p.Lines[index].Text, " ")
+		parts := lo.Filter(strings.Split(p.Lines[index].Text, " "), func(s string, _ int) bool {
+			return len(s) > 0
+		})
+
 		if allAreChords(parts) {
 			p.Lines[index].Type = LineTypes.CHORDS
 		} else {
