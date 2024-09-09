@@ -5,7 +5,7 @@ package parser
 type accidentalType int
 
 const (
-	None accidentalType = iota
+	Natural accidentalType = iota
 	Sharp
 	Flat
 )

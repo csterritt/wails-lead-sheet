@@ -17,14 +17,14 @@ type AccidentalType struct {
 }
 
 type accidentaltypesContainer struct {
-	NONE  AccidentalType
-	SHARP AccidentalType
-	FLAT  AccidentalType
+	NATURAL AccidentalType
+	SHARP   AccidentalType
+	FLAT    AccidentalType
 }
 
 var AccidentalTypes = accidentaltypesContainer{
-	NONE: AccidentalType{
-		accidentalType: None,
+	NATURAL: AccidentalType{
+		accidentalType: Natural,
 	},
 	SHARP: AccidentalType{
 		accidentalType: Sharp,
@@ -36,7 +36,7 @@ var AccidentalTypes = accidentaltypesContainer{
 
 func (c accidentaltypesContainer) All() []AccidentalType {
 	return []AccidentalType{
-		c.NONE,
+		c.NATURAL,
 		c.SHARP,
 		c.FLAT,
 	}
@@ -67,8 +67,8 @@ func ParseAccidentalType(a any) (AccidentalType, error) {
 
 func stringToAccidentalType(s string) AccidentalType {
 	switch s {
-	case "None":
-		return AccidentalTypes.NONE
+	case "Natural":
+		return AccidentalTypes.NATURAL
 	case "Sharp":
 		return AccidentalTypes.SHARP
 	case "Flat":
@@ -91,9 +91,9 @@ func ExhaustiveAccidentalTypes(f func(AccidentalType)) {
 }
 
 var validAccidentalTypes = map[AccidentalType]bool{
-	AccidentalTypes.NONE:  true,
-	AccidentalTypes.SHARP: true,
-	AccidentalTypes.FLAT:  true,
+	AccidentalTypes.NATURAL: true,
+	AccidentalTypes.SHARP:   true,
+	AccidentalTypes.FLAT:    true,
 }
 
 func (p AccidentalType) IsValid() bool {
@@ -132,14 +132,14 @@ func _() {
 	// Re-run the goenums command to generate them again.
 	// Does not identify newly added constant values unless order changes
 	var x [1]struct{}
-	_ = x[None-0]
+	_ = x[Natural-0]
 	_ = x[Sharp-1]
 	_ = x[Flat-2]
 }
 
-const _accidentaltypes_name = "NoneSharpFlat"
+const _accidentaltypes_name = "NaturalSharpFlat"
 
-var _accidentaltypes_index = [...]uint16{0, 4, 9, 13}
+var _accidentaltypes_index = [...]uint16{0, 7, 12, 16}
 
 func (i accidentalType) String() string {
 	if i < 0 || i >= accidentalType(len(_accidentaltypes_index)-1) {
