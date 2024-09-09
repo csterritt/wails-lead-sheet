@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/samber/lo"
@@ -70,52 +71,29 @@ func TestAllAreChords(t *testing.T) {
 		t.Errorf("Chords found to not be chords")
 	}
 
-	if !allAreChords([]string{"Ab", "Bb", "Gb"}) {
-		t.Errorf("Flat chords found to not be chords")
-	}
+	for _, suffix := range strings.Split(chordSuffixes, " ") {
+		arr := lo.Map([]string{"A", "C", "G"}, func(s string, _ int) string {
+			return s + suffix
+		})
 
-	if !allAreChords([]string{"A#", "B#", "G#"}) {
-		t.Errorf("Sharp chords found to not be chords")
-	}
+		if !allAreChords(arr) {
+			t.Errorf("Not all %s chords are chords", suffix)
+		}
 
-	if !allAreChords([]string{"A7", "B7", "G7"}) {
-		t.Errorf("Dominant chords found to not be chords")
-	}
+		arr = lo.Map([]string{"Ab", "Cb", "Gb"}, func(s string, _ int) string {
+			return s + suffix
+		})
 
-	if !allAreChords([]string{"Ab7", "Bb7", "Gb7"}) {
-		t.Errorf("Flat dominant seven chords found to not be chords")
-	}
+		if !allAreChords(arr) {
+			t.Errorf("Not all %s chords are chords", suffix)
+		}
+		arr = lo.Map([]string{"A#", "C#", "G#"}, func(s string, _ int) string {
+			return s + suffix
+		})
 
-	if !allAreChords([]string{"A#7", "B#7", "G#7"}) {
-		t.Errorf("Sharp dominant seven chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"A5", "B5", "G5"}) {
-		t.Errorf("Five chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"Am", "Dm", "Gm"}) {
-		t.Errorf("Minor chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"Abm", "Bbm", "Gbm"}) {
-		t.Errorf("Flat minor chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"A#m", "B#m", "G#m"}) {
-		t.Errorf("Sharp minor chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"Am7", "Bm7", "Gm7"}) {
-		t.Errorf("Dominant minor chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"Abm7", "Bbm7", "Gbm7"}) {
-		t.Errorf("Flat dominant 7 minor chords found to not be chords")
-	}
-
-	if !allAreChords([]string{"A#m7", "B#m7", "G#m7"}) {
-		t.Errorf("Sharp dominant 7 minor chords found to not be chords")
+		if !allAreChords(arr) {
+			t.Errorf("Not all %s chords are chords", suffix)
+		}
 	}
 
 	if allAreChords([]string{"Foo", "lyric", "lyric"}) {

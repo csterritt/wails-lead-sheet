@@ -7,6 +7,10 @@ import (
 	"github.com/samber/lo"
 )
 
+const chordSuffixes = "m 7 5 dim dim7 aug sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj13 maj9#11 maj13#11 add9 6add9 maj7b5 maj7#5 m6 m9 m11 m13 madd9 m6add9 mmaj7 mmaj9 m7b5 m7#5 6 9 11 13 7b5 7#5 7b9 7"
+
+var knownChordSuffixes map[string]bool
+
 type Line struct {
 	Text string
 	Type LineType
@@ -14,6 +18,13 @@ type Line struct {
 
 type ParsedContent struct {
 	Lines []Line
+}
+
+func init() {
+	knownChordSuffixes = make(map[string]bool)
+	for _, suffix := range strings.Split(chordSuffixes, " ") {
+		knownChordSuffixes[suffix] = true
+	}
 }
 
 func firstNonBlankChar(s string) (rune, bool) {
@@ -35,23 +46,18 @@ func isChord(s string) bool {
 		return true
 	}
 
-	if len(s) == 2 && (s[1] == 'b' || s[1] == '#' || s[1] == '7' || s[1] == '5' || s[1] == 'm') {
+	start := 1
+	if s[1] == 'b' || s[1] == '#' {
+		start = 2
+	}
+
+	if len(s) == 2 {
 		return true
 	}
 
-	if len(s) == 3 && (s[1] == 'b' || s[1] == '#') && (s[2] == 'm' || s[2] == '7') {
-		return true
-	}
+	_, found := knownChordSuffixes[s[start:]]
 
-	if len(s) == 3 && s[1] == 'm' && s[2] == '7' {
-		return true
-	}
-
-	if len(s) == 4 && (s[1] == 'b' || s[1] == '#') && s[2] == 'm' && s[3] == '7' {
-		return true
-	}
-
-	return false
+	return found
 }
 
 func allAreChords(s []string) bool {
