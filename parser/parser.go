@@ -39,7 +39,8 @@ func firstNonBlankChar(s string) (rune, bool) {
 }
 
 func isChord(s string) bool {
-	if s[0] < 'A' || s[0] > 'G' {
+	s = strings.ToLower(s)
+	if s[0] < 'a' || s[0] > 'g' {
 		return false
 	}
 

@@ -56,6 +56,10 @@ func TestAllAreChords(t *testing.T) {
 		t.Errorf("Chords found to not be chords")
 	}
 
+	if !allAreChords([]string{"A#M", "DbMAJ7b5", "GDim"}) {
+		t.Errorf("Chords with capitalized colors found to not be chords")
+	}
+
 	for _, suffix := range strings.Split(chordSuffixes, " ") {
 		arr := lo.Map([]string{"A", "C", "G"}, func(s string, _ int) string {
 			return s + suffix
