@@ -12,8 +12,9 @@ const chordSuffixes = "m 7 5 dim dim7 aug sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj
 var knownChordSuffixes map[string]bool
 
 type Line struct {
-	Text string
-	Type LineType
+	LineNumber int
+	Text       string
+	Type       LineType
 }
 
 type ParsedContent struct {
@@ -67,9 +68,9 @@ func allAreChords(s []string) bool {
 }
 
 func (p *ParsedContent) importContent(content string) error {
-	p.Lines = lo.FilterMap(strings.Split(content, "\n"), func(s string, _ int) (Line, bool) {
+	p.Lines = lo.Map(strings.Split(content, "\n"), func(s string, _ int) Line {
 		res := strings.TrimRight(s, " \t\r\n")
-		return Line{Text: res, Type: LineTypes.TEXT}, len(res) > 0
+		return Line{Text: res, Type: LineTypes.TEXT}
 	})
 
 	return nil
@@ -98,5 +99,30 @@ func (p *ParsedContent) categorizeLines() error {
 			p.Lines[index].Type = LineTypes.LYRICS
 		}
 	}
+	return nil
+}
+
+func (p *ParsedContent) compactLines() error {
+	lastWasEmpty := true
+	p.Lines = lo.Filter(p.Lines, func(item Line, index int) bool {
+		if item.Type == LineTypes.EMPTY && lastWasEmpty {
+			return false
+		}
+
+		lastWasEmpty = item.Type == LineTypes.EMPTY
+		return true
+	})
+
+	if p.Lines[len(p.Lines)-1].Type == LineTypes.EMPTY {
+		p.Lines = p.Lines[:len(p.Lines)-1]
+	}
+
+	next := 0
+	p.Lines = lo.Map(p.Lines, func(item Line, _ int) Line {
+		item.LineNumber = next
+		next += 1
+		return item
+	})
+
 	return nil
 }

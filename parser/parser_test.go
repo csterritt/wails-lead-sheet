@@ -17,11 +17,17 @@ func lineSlicesEqual(a, b []Line) bool {
 	if len(a) != len(b) {
 		return false
 	}
+
 	for i, v := range a {
 		if v.Type != b[i].Type {
 			return false
 		}
+
 		if v.Text != b[i].Text {
+			return false
+		}
+
+		if v.LineNumber != b[i].LineNumber {
 			return false
 		}
 	}
@@ -30,7 +36,7 @@ func lineSlicesEqual(a, b []Line) bool {
 }
 
 func TestImportContent(t *testing.T) {
-	expected := lo.Map([]string{"[Section]", "   C   D   E", "Foo lyric lyric"}, func(s string, _ int) Line {
+	expected := lo.Map([]string{"", "[Section]", "   C   D   E", "Foo lyric lyric", ""}, func(s string, _ int) Line {
 		return Line{Text: s, Type: LineTypes.TEXT}
 	})
 	parser := ParsedContent{}
@@ -38,6 +44,7 @@ func TestImportContent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error parsing content: %s", err)
 	}
+
 	if !lineSlicesEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
 			expected, parser.Lines)
@@ -85,18 +92,67 @@ func TestCategorizeLines(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error parsing content: %s", err)
 	}
+
 	err = parser.categorizeLines()
 	if err != nil {
 		t.Errorf("Error categorizing lines: %s", err)
 	}
 
 	expected := []Line{
+		{Text: "", Type: LineTypes.EMPTY},
 		{Text: "[Section]", Type: LineTypes.SECTION},
 		{Text: "   C   D   E", Type: LineTypes.CHORDS},
 		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
+		{Text: "", Type: LineTypes.EMPTY},
 	}
 	if !lineSlicesEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
 			expected, parser.Lines)
+	}
+}
+
+func TestCompactLines(t *testing.T) {
+	compactContent := `
+
+[Section]   
+
+
+   C   D   E   
+
+Foo lyric lyric
+
+`
+	parser := ParsedContent{}
+	err := parser.importContent(compactContent)
+	if err != nil {
+		t.Errorf("Error parsing content: %s", err)
+	}
+
+	err = parser.categorizeLines()
+	if err != nil {
+		t.Errorf("Error categorizing lines: %s", err)
+	}
+
+	err = parser.compactLines()
+	if err != nil {
+		t.Errorf("Error compacting lines: %s", err)
+	}
+
+	expected := []Line{
+		{Text: "[Section]", Type: LineTypes.SECTION, LineNumber: 0},
+		{Text: "", Type: LineTypes.EMPTY, LineNumber: 1},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS, LineNumber: 2},
+		{Text: "", Type: LineTypes.EMPTY, LineNumber: 3},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, LineNumber: 4},
+	}
+	if !lineSlicesEqual(parser.Lines, expected) {
+		t.Errorf("Expected:\n")
+		for _, line := range expected {
+			t.Errorf("  %#v\n", line)
+		}
+		t.Errorf("Got:\n")
+		for _, line := range parser.Lines {
+			t.Errorf("  %#v\n", line)
+		}
 	}
 }
