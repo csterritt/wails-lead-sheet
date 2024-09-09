@@ -9,4 +9,5 @@ const (
 	Section
 	Chords
 	Lyrics
+	Empty
 )

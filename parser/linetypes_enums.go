@@ -21,6 +21,7 @@ type linetypesContainer struct {
 	SECTION LineType
 	CHORDS  LineType
 	LYRICS  LineType
+	EMPTY   LineType
 }
 
 var LineTypes = linetypesContainer{
@@ -36,6 +37,9 @@ var LineTypes = linetypesContainer{
 	LYRICS: LineType{
 		lineType: Lyrics,
 	},
+	EMPTY: LineType{
+		lineType: Empty,
+	},
 }
 
 func (c linetypesContainer) All() []LineType {
@@ -44,6 +48,7 @@ func (c linetypesContainer) All() []LineType {
 		c.SECTION,
 		c.CHORDS,
 		c.LYRICS,
+		c.EMPTY,
 	}
 }
 
@@ -80,6 +85,8 @@ func stringToLineType(s string) LineType {
 		return LineTypes.CHORDS
 	case "Lyrics":
 		return LineTypes.LYRICS
+	case "Empty":
+		return LineTypes.EMPTY
 	}
 	return invalidLineType
 }
@@ -102,6 +109,7 @@ var validLineTypes = map[LineType]bool{
 	LineTypes.SECTION: true,
 	LineTypes.CHORDS:  true,
 	LineTypes.LYRICS:  true,
+	LineTypes.EMPTY:   true,
 }
 
 func (p LineType) IsValid() bool {
@@ -144,11 +152,12 @@ func _() {
 	_ = x[Section-1]
 	_ = x[Chords-2]
 	_ = x[Lyrics-3]
+	_ = x[Empty-4]
 }
 
-const _linetypes_name = "TextSectionChordsLyrics"
+const _linetypes_name = "TextSectionChordsLyricsEmpty"
 
-var _linetypes_index = [...]uint16{0, 4, 11, 17, 23}
+var _linetypes_index = [...]uint16{0, 4, 11, 17, 23, 28}
 
 func (i lineType) String() string {
 	if i < 0 || i >= lineType(len(_linetypes_index)-1) {
