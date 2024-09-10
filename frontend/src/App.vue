@@ -1,5 +1,24 @@
 <template>
   <h3 class="text-2xl">Lead Sheet App</h3>
+
+  <p>Chosen file: {{ fileName }}</p>
+
+  <button class="btn btn-primary" @click="openFile">Open a file</button>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ref } from 'vue'
+
+import { ChooseFile } from '../wailsjs/go/main/App'
+
+const fileName = ref('')
+
+const openFile = async () => {
+  const fileOpened = await ChooseFile()
+  if (fileOpened == null || fileOpened.length === 0) {
+    fileName.value = 'No file selected?'
+  } else {
+    fileName.value = JSON.stringify(fileOpened)
+  }
+}
+</script>
