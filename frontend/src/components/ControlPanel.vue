@@ -1,24 +1,23 @@
 <template>
   <div>
-    <p>Chosen file: {{ fileName }}</p>
+    <div v-if="store.loading" class="italic">Loading...</div>
 
-    <button class="btn btn-primary" @click="openFile">Open a file</button>
+    <div v-else>
+      <p v-if="store.errorMessage.trim().length === 0">
+        Chosen file: {{ store.currentFileName }}
+      </p>
+
+      <p v-else>Error: {{ store.errorMessage }}</p>
+    </div>
+
+    <button class="btn btn-primary" @click="store.retrieveFile">
+      Open a file
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useContentStore } from '../store'
 
-import { ChooseFile } from '../../wailsjs/go/main/App'
-
-const fileName = ref('')
-
-const openFile = async () => {
-  const fileOpened = await ChooseFile()
-  if (fileOpened == null || fileOpened.length === 0) {
-    fileName.value = 'No file selected?'
-  } else {
-    fileName.value = JSON.stringify(fileOpened)
-  }
-}
+const store = useContentStore()
 </script>

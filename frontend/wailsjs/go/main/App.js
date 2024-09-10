@@ -5,3 +5,7 @@
 export function ChooseFile() {
   return window['go']['main']['App']['ChooseFile']();
 }
+
+export function RetrieveFileContents(arg1) {
+  return window['go']['main']['App']['RetrieveFileContents'](arg1);
+}
