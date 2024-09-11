@@ -7,7 +7,7 @@
     <div v-for="line in store.currentFileContent.Lines" :key="line.LineNumber">
       <div :class="lineClass(line.LineNumber)">
         <span class="w-6">{{ line.LineNumber + 1 }}</span>
-        <span>{{ line.Text }}</span>
+        <pre>{{ line.Text }}</pre>
       </div>
     </div>
   </div>

@@ -125,6 +125,41 @@ func TestCategorizeLines(t *testing.T) {
 	}
 }
 
+func TestCategorizeLinesWithNCs(t *testing.T) {
+	parser := ParsedContent{}
+	contentWithNCs := `
+[Section]   
+   C   D   E   
+Foo lyric lyric
+N.C.   N.C.
+Spoken line
+`
+
+	err := parser.importContent(contentWithNCs)
+	if err != nil {
+		t.Errorf("Error parsing content with N.C.s: %s", err)
+	}
+
+	err = parser.categorizeLines()
+	if err != nil {
+		t.Errorf("Error categorizing lines: %s", err)
+	}
+
+	expected := []Line{
+		{Text: "", Type: LineTypes.EMPTY},
+		{Text: "[Section]", Type: LineTypes.SECTION},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
+		{Text: "N.C.   N.C.", Type: LineTypes.CHORDS},
+		{Text: "Spoken line", Type: LineTypes.LYRICS},
+		{Text: "", Type: LineTypes.EMPTY},
+	}
+	if !lineSlicesEqual(parser.Lines, expected) {
+		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
+			expected, parser.Lines)
+	}
+}
+
 func TestCompactLines(t *testing.T) {
 	compactContent := `
 

@@ -31,7 +31,7 @@ func init() {
 		knownChordSuffixes[suffix] = true
 	}
 
-	chordSplitter = regexp.MustCompile("[!-.:-@[-`{-~ \t\r\n]+") //[!-/:-@[-`{-~]
+	chordSplitter = regexp.MustCompile("[!-\\-:-@[-`{-~ \t\r\n]+") //[!-/:-@[-`{-~]
 	punctuation = regexp.MustCompile("^[[:punct:]]+$")
 }
 
@@ -112,7 +112,7 @@ func (p *ParsedContent) categorizeLines() error {
 		}
 
 		parts := lo.Filter(chordSplitter.Split(p.Lines[index].Text, -1), func(s string, _ int) bool {
-			return len(s) > 0 && punctuation.FindString(s) == ""
+			return len(s) > 0 && (strings.ToLower(s) == "n.c." || punctuation.FindString(s) == "")
 		})
 
 		if allAreChords(parts) {
