@@ -127,3 +127,22 @@ func (p *ParsedContent) compactLines() error {
 
 	return nil
 }
+
+func (p *ParsedContent) ParseContent(content string) error {
+	err := p.importContent(content)
+	if err != nil {
+		return err
+	}
+
+	err = p.categorizeLines()
+	if err != nil {
+		return err
+	}
+
+	err = p.compactLines()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -1,12 +1,22 @@
-import { ref } from 'vue'
+import { computed, Ref, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { ChooseFile, RetrieveFileContents } from '../wailsjs/go/main/App'
 import { LogPrint } from '../wailsjs/runtime'
 
+type Line = {
+  LineNumber: number
+  Text: string
+  Type: string
+}
+
+type Content = {
+  Lines: Line[]
+}
+
 export const useContentStore = defineStore('counter', () => {
   const currentFileName = ref('')
-  const currentFileContent = ref('')
+  const currentFileContent: Ref<Content> = ref({ Lines: [] })
   const errorMessage = ref('')
   const loading = ref(false)
 
@@ -17,16 +27,19 @@ export const useContentStore = defineStore('counter', () => {
     } else {
       loading.value = true
       currentFileName.value = fileOpened
-      let content = ''
-      let error = ''
-      currentFileContent.value = ''
+      let content: any = null
+      currentFileContent.value = { Lines: [] }
       try {
         content = await RetrieveFileContents(currentFileName.value)
         currentFileContent.value = content
-      } catch (err: any) {
-        error = err.toString()
+
         LogPrint(
-          `error caught during file open: ${JSON.stringify(error, null, 2)}`
+          `current file content: ${JSON.stringify(currentFileContent.value, null, 2)}`
+        )
+      } catch (err: any) {
+        errorMessage.value = err.toString()
+        LogPrint(
+          `error caught during file open: ${JSON.stringify(errorMessage.value, null, 2)}`
         )
       }
 
@@ -34,10 +47,29 @@ export const useContentStore = defineStore('counter', () => {
     }
   }
 
+  const lineClass = computed(() => (lineNumber: number) => {
+    let res = `flex space-x-2`
+
+    if (currentFileContent.value.Lines[lineNumber].Type === 'Section') {
+      res += ` bg-cyan-100`
+    }
+
+    if (currentFileContent.value.Lines[lineNumber].Type === 'Chords') {
+      res += ` bg-pink-200`
+    }
+
+    if (currentFileContent.value.Lines[lineNumber].Type === 'Lyrics') {
+      res += ` bg-yellow-100`
+    }
+
+    return res
+  })
+
   return {
     currentFileName,
     currentFileContent,
     errorMessage,
+    lineClass,
     loading,
     retrieveFile,
   }

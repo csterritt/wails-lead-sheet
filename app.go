@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"wails-lead-sheet/parser"
 )
 
 // App struct
@@ -51,11 +52,17 @@ func (a *App) ChooseFile() string {
 }
 
 // RetrieveFileContents retrieves the contents from the given file path
-func (a *App) RetrieveFileContents(filePath string) (string, error) {
+func (a *App) RetrieveFileContents(filePath string) (parser.ParsedContent, error) {
 	contents, err := os.ReadFile(filePath)
 	if err != nil {
 		runtime.LogPrintf(a.ctx, "Retrieve contents of %s contains caught %v\n", filePath, err)
 	}
 
-	return string(contents), err
+	prsr := parser.ParsedContent{}
+	err = prsr.ParseContent(string(contents))
+	if err != nil {
+		return prsr, err
+	}
+
+	return prsr, nil
 }
