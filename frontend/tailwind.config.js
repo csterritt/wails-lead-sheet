@@ -14,6 +14,7 @@ module.exports = {
         'source-sans-pro',
         'sans-serif',
       ],
+      monoslab: ['Nimbus Mono PS', 'Courier New', 'monospace'],
       monocode: [
         'ui-monospace',
         'Cascadia Code',

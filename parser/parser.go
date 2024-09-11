@@ -39,25 +39,35 @@ func firstNonBlankChar(s string) (rune, bool) {
 }
 
 func isChord(s string) bool {
-	s = strings.ToLower(s)
-	if s[0] < 'a' || s[0] > 'g' {
-		return false
-	}
+	found := false
+	if strings.Index(s, "/") != -1 {
+		parts := strings.Split(s, "/")
+		if len(parts) != 2 {
+			return false
+		}
 
-	if len(s) == 1 {
-		return true
-	}
+		return isChord(parts[0]) && isChord(parts[1])
+	} else {
+		s = strings.ToLower(s)
+		if s[0] < 'a' || s[0] > 'g' {
+			return false
+		}
 
-	start := 1
-	if s[1] == 'b' || s[1] == '#' {
-		start = 2
-	}
+		if len(s) == 1 {
+			return true
+		}
 
-	if len(s) == 2 {
-		return true
-	}
+		start := 1
+		if s[1] == 'b' || s[1] == '#' {
+			start = 2
+		}
 
-	_, found := knownChordSuffixes[s[start:]]
+		if len(s) == 2 {
+			return true
+		}
+
+		_, found = knownChordSuffixes[s[start:]]
+	}
 
 	return found
 }
