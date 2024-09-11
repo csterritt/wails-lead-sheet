@@ -11,6 +11,7 @@ const content = `
 [Section]   
    C   D   E   
 Foo lyric lyric
+a - B|C / / /| D E
 `
 
 func lineSlicesEqual(a, b []Line) bool {
@@ -36,7 +37,7 @@ func lineSlicesEqual(a, b []Line) bool {
 }
 
 func TestImportContent(t *testing.T) {
-	expected := lo.Map([]string{"", "[Section]", "   C   D   E", "Foo lyric lyric", ""}, func(s string, _ int) Line {
+	expected := lo.Map([]string{"", "[Section]", "   C   D   E", "Foo lyric lyric", "a - B|C / / /| D E", ""}, func(s string, _ int) Line {
 		return Line{Text: s, Type: LineTypes.TEXT}
 	})
 	parser := ParsedContent{}
@@ -62,6 +63,10 @@ func TestAllAreChords(t *testing.T) {
 
 	if !allAreChords([]string{"A/C", "Db/Gb", "GDim/C"}) {
 		t.Errorf("Chords with inversions found to not be chords")
+	}
+
+	if !allAreChords([]string{"N.C."}) {
+		t.Errorf("N.C. marks found to not be chords")
 	}
 
 	for _, suffix := range strings.Split(chordSuffixes, " ") {
@@ -111,6 +116,7 @@ func TestCategorizeLines(t *testing.T) {
 		{Text: "[Section]", Type: LineTypes.SECTION},
 		{Text: "   C   D   E", Type: LineTypes.CHORDS},
 		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
+		{Text: "a - B|C / / /| D E", Type: LineTypes.CHORDS},
 		{Text: "", Type: LineTypes.EMPTY},
 	}
 	if !lineSlicesEqual(parser.Lines, expected) {

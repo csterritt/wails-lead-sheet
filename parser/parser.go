@@ -1,15 +1,14 @@
 package parser
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 
 	"github.com/samber/lo"
 )
 
-const chordSuffixes = "m 7 5 dim dim7 aug sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj13 maj9#11 maj13#11 add9 6add9 maj7b5 maj7#5 m6 m9 m11 m13 madd9 m6add9 mmaj7 mmaj9 m7b5 m7#5 6 9 11 13 7b5 7#5 7b9 7"
-
-var knownChordSuffixes map[string]bool
+const chordSuffixes = "m 7 5 dim dim7 aug sus sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj13 maj9#11 maj13#11 add9 6add9 maj7b5 maj7#5 m6 m9 m11 m13 madd9 m6add9 mmaj7 mmaj9 m7b5 m7#5 6 9 11 13 7b5 7#5 7b9 7"
 
 type Line struct {
 	LineNumber int
@@ -21,11 +20,19 @@ type ParsedContent struct {
 	Lines []Line
 }
 
+var knownChordSuffixes map[string]bool
+
+var chordSplitter *regexp.Regexp
+var punctuation *regexp.Regexp
+
 func init() {
 	knownChordSuffixes = make(map[string]bool)
 	for _, suffix := range strings.Split(chordSuffixes, " ") {
 		knownChordSuffixes[suffix] = true
 	}
+
+	chordSplitter = regexp.MustCompile("[!-.:-@[-`{-~ \t\r\n]+") //[!-/:-@[-`{-~]
+	punctuation = regexp.MustCompile("^[[:punct:]]+$")
 }
 
 func firstNonBlankChar(s string) (rune, bool) {
@@ -39,7 +46,12 @@ func firstNonBlankChar(s string) (rune, bool) {
 }
 
 func isChord(s string) bool {
+	s = strings.ToLower(s)
 	found := false
+	if s == "n.c." {
+		return true
+	}
+
 	if strings.Index(s, "/") != -1 {
 		parts := strings.Split(s, "/")
 		if len(parts) != 2 {
@@ -48,7 +60,6 @@ func isChord(s string) bool {
 
 		return isChord(parts[0]) && isChord(parts[1])
 	} else {
-		s = strings.ToLower(s)
 		if s[0] < 'a' || s[0] > 'g' {
 			return false
 		}
@@ -100,8 +111,8 @@ func (p *ParsedContent) categorizeLines() error {
 			continue
 		}
 
-		parts := lo.Filter(strings.Split(p.Lines[index].Text, " "), func(s string, _ int) bool {
-			return len(s) > 0
+		parts := lo.Filter(chordSplitter.Split(p.Lines[index].Text, -1), func(s string, _ int) bool {
+			return len(s) > 0 && punctuation.FindString(s) == ""
 		})
 
 		if allAreChords(parts) {

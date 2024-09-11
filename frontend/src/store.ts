@@ -50,16 +50,16 @@ export const useContentStore = defineStore('counter', () => {
   const lineClass = computed(() => (lineNumber: number) => {
     let res = `flex space-x-2`
 
-    if (currentFileContent.value.Lines[lineNumber].Type === 'Section') {
-      res += ` bg-cyan-100`
-    }
-
-    if (currentFileContent.value.Lines[lineNumber].Type === 'Chords') {
-      res += ` bg-pink-200`
-    }
-
-    if (currentFileContent.value.Lines[lineNumber].Type === 'Lyrics') {
-      res += ` bg-yellow-100`
+    switch (currentFileContent.value.Lines[lineNumber].Type) {
+      case 'Section':
+        res += ` bg-cyan-100`
+        break
+      case 'Chords':
+        res += ` bg-pink-200`
+        break
+      case 'Lyrics':
+        res += ` bg-yellow-100`
+        break
     }
 
     return res
