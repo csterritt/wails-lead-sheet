@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"regexp"
 	"strings"
 	"unicode"
 
@@ -9,6 +8,11 @@ import (
 )
 
 const chordSuffixes = "m 7 5 dim dim7 aug sus sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj13 maj9#11 maj13#11 add9 6add9 maj7b5 maj7#5 m6 m9 m11 m13 madd9 m6add9 mmaj7 mmaj9 m7b5 m7#5 6 9 11 13 7b5 7#5 7b9 7"
+
+type LetterRun struct {
+	Letters string
+	Type    LetterRunType
+}
 
 type Line struct {
 	LineNumber int
@@ -22,8 +26,8 @@ type ParsedContent struct {
 
 var knownChordSuffixes map[string]bool
 
-var chordSplitter *regexp.Regexp
-var punctuation *regexp.Regexp
+var chordLetters map[rune]bool
+var separators map[rune]bool
 
 func init() {
 	knownChordSuffixes = make(map[string]bool)
@@ -31,8 +35,23 @@ func init() {
 		knownChordSuffixes[suffix] = true
 	}
 
-	chordSplitter = regexp.MustCompile("[!-\\-:-@[-`{-~ \t\r\n]+") //[!-/:-@[-`{-~]
-	punctuation = regexp.MustCompile("^[[:punct:]]+$")
+	chordLetters = make(map[rune]bool)
+	for _, ch := range chordSuffixes {
+		if ch != ' ' {
+			chordLetters[ch] = true
+		}
+	}
+
+	for _, ch := range "abcdefg#n." {
+		chordLetters[ch] = true
+	}
+
+	separators = make(map[rune]bool)
+	for _, ch := range " \t\r\n!\"$%&'()*+,-:;<=>?@[\\]^_`{|}~" {
+		if _, found := chordLetters[ch]; !found {
+			separators[ch] = true
+		}
+	}
 }
 
 func firstNonBlankChar(s string) (rune, bool) {
@@ -83,10 +102,72 @@ func isChord(s string) bool {
 	return found
 }
 
-func allAreChords(s []string) bool {
-	return lo.Reduce(s, func(agg bool, item string, _ int) bool {
-		return agg && isChord(item)
+func allAreChords(s []LetterRun) bool {
+	foundOneChord := false
+	allAreChordOrSeparators := lo.Reduce(s, func(agg bool, item LetterRun, _ int) bool {
+		if item.Type == LetterRunTypes.CHORDRUN {
+			foundOneChord = true
+		}
+
+		return agg && item.Type == LetterRunTypes.CHORDRUN || agg && item.Type == LetterRunTypes.SEPARATORRUN
 	}, true)
+
+	return foundOneChord && allAreChordOrSeparators
+}
+
+func makeLetterRuns(s string) []LetterRun {
+	res := make([]LetterRun, 0)
+
+	currentText := ""
+	currentType := LetterRunTypes.UNKNOWNRUN
+	for index, ch := range strings.ToLower(s) {
+		if _, found := separators[ch]; found {
+			if currentType == LetterRunTypes.SEPARATORRUN {
+				currentText += string(s[index])
+			} else {
+				if len(currentText) > 0 {
+					res = append(res, LetterRun{Letters: currentText, Type: currentType})
+				}
+				currentText = string(s[index])
+				currentType = LetterRunTypes.SEPARATORRUN
+			}
+		} else {
+			if _, found := chordLetters[ch]; found {
+				if currentType == LetterRunTypes.CHORDRUN || currentType == LetterRunTypes.WORDRUN {
+					currentText += string(s[index])
+				} else {
+					if len(currentText) > 0 {
+						res = append(res, LetterRun{Letters: currentText, Type: currentType})
+					}
+					currentText = string(s[index])
+					currentType = LetterRunTypes.CHORDRUN
+				}
+			} else {
+				if ch == '/' {
+					if len(currentText) == 0 {
+						currentType = LetterRunTypes.SEPARATORRUN
+					}
+					currentText += string(s[index])
+				} else {
+					if currentType == LetterRunTypes.CHORDRUN || currentType == LetterRunTypes.WORDRUN {
+						currentText += string(s[index])
+					} else {
+						if len(currentText) > 0 {
+							res = append(res, LetterRun{Letters: currentText, Type: currentType})
+						}
+						currentText = string(s[index])
+					}
+					currentType = LetterRunTypes.WORDRUN
+				}
+			}
+		}
+	}
+
+	if len(currentText) > 0 {
+		res = append(res, LetterRun{Letters: currentText, Type: currentType})
+	}
+
+	return res
 }
 
 func (p *ParsedContent) importContent(content string) error {
@@ -111,10 +192,7 @@ func (p *ParsedContent) categorizeLines() error {
 			continue
 		}
 
-		parts := lo.Filter(chordSplitter.Split(p.Lines[index].Text, -1), func(s string, _ int) bool {
-			return len(s) > 0 && (strings.ToLower(s) == "n.c." || punctuation.FindString(s) == "")
-		})
-
+		parts := makeLetterRuns(p.Lines[index].Text)
 		if allAreChords(parts) {
 			p.Lines[index].Type = LineTypes.CHORDS
 		} else {

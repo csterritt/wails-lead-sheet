@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -14,28 +15,6 @@ Foo lyric lyric
 a - B|C / / /| D E
 `
 
-func lineSlicesEqual(a, b []Line) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i, v := range a {
-		if v.Type != b[i].Type {
-			return false
-		}
-
-		if v.Text != b[i].Text {
-			return false
-		}
-
-		if v.LineNumber != b[i].LineNumber {
-			return false
-		}
-	}
-
-	return true
-}
-
 func TestImportContent(t *testing.T) {
 	expected := lo.Map([]string{"", "[Section]", "   C   D   E", "Foo lyric lyric", "a - B|C / / /| D E", ""}, func(s string, _ int) Line {
 		return Line{Text: s, Type: LineTypes.TEXT}
@@ -46,55 +25,39 @@ func TestImportContent(t *testing.T) {
 		t.Errorf("Error parsing content: %s", err)
 	}
 
-	if !lineSlicesEqual(parser.Lines, expected) {
+	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
 			expected, parser.Lines)
 	}
 }
 
 func TestAllAreChords(t *testing.T) {
-	if !allAreChords([]string{"A", "D", "G"}) {
+	if !allAreChords(makeLetterRuns("A D G")) {
 		t.Errorf("Chords found to not be chords")
 	}
 
-	if !allAreChords([]string{"A#M", "DbMAJ7b5", "GDim"}) {
+	if !allAreChords(makeLetterRuns("A#M DbMAJ7b5 GDim")) {
 		t.Errorf("Chords with capitalized colors found to not be chords")
 	}
 
-	if !allAreChords([]string{"A/C", "Db/Gb", "GDim/C"}) {
+	if !allAreChords(makeLetterRuns("A/C Db/Gb GDim/C")) {
 		t.Errorf("Chords with inversions found to not be chords")
 	}
 
-	if !allAreChords([]string{"N.C."}) {
+	if !allAreChords(makeLetterRuns("N.C.")) {
 		t.Errorf("N.C. marks found to not be chords")
 	}
 
 	for _, suffix := range strings.Split(chordSuffixes, " ") {
-		arr := lo.Map([]string{"A", "C", "G"}, func(s string, _ int) string {
+		arr := lo.Map([]string{"A", "C#", "Gb"}, func(s string, _ int) string {
 			return s + suffix
 		})
-
-		if !allAreChords(arr) {
-			t.Errorf("Not all %s chords are chords", suffix)
-		}
-
-		arr = lo.Map([]string{"Ab", "Cb", "Gb"}, func(s string, _ int) string {
-			return s + suffix
-		})
-
-		if !allAreChords(arr) {
-			t.Errorf("Not all %s chords are chords", suffix)
-		}
-		arr = lo.Map([]string{"A#", "C#", "G#"}, func(s string, _ int) string {
-			return s + suffix
-		})
-
-		if !allAreChords(arr) {
+		if !allAreChords(makeLetterRuns(strings.Join(arr, " "))) {
 			t.Errorf("Not all %s chords are chords", suffix)
 		}
 	}
 
-	if allAreChords([]string{"Foo", "lyric", "lyric"}) {
+	if allAreChords(makeLetterRuns("Foo lyric dude")) {
 		t.Errorf("Non-chords found to be chords")
 	}
 }
@@ -119,7 +82,7 @@ func TestCategorizeLines(t *testing.T) {
 		{Text: "a - B|C / / /| D E", Type: LineTypes.CHORDS},
 		{Text: "", Type: LineTypes.EMPTY},
 	}
-	if !lineSlicesEqual(parser.Lines, expected) {
+	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
 			expected, parser.Lines)
 	}
@@ -154,7 +117,42 @@ Spoken line
 		{Text: "Spoken line", Type: LineTypes.LYRICS},
 		{Text: "", Type: LineTypes.EMPTY},
 	}
-	if !lineSlicesEqual(parser.Lines, expected) {
+	if !reflect.DeepEqual(parser.Lines, expected) {
+		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
+			expected, parser.Lines)
+	}
+}
+
+func TestCategorizeLinesSharpChords(t *testing.T) {
+	parser := ParsedContent{}
+	contentWithSharpChords := `
+[Section]   
+   C   D   E   
+Foo lyric lyric
+C#m7       Asus2/C#        C#m7
+Line with sharp chords
+`
+
+	err := parser.importContent(contentWithSharpChords)
+	if err != nil {
+		t.Errorf("Error importing content with sharp chords: %s", err)
+	}
+
+	err = parser.categorizeLines()
+	if err != nil {
+		t.Errorf("Error categorizing lines: %s", err)
+	}
+
+	expected := []Line{
+		{Text: "", Type: LineTypes.EMPTY},
+		{Text: "[Section]", Type: LineTypes.SECTION},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
+		{Text: "C#m7       Asus2/C#        C#m7", Type: LineTypes.CHORDS},
+		{Text: "Line with sharp chords", Type: LineTypes.LYRICS},
+		{Text: "", Type: LineTypes.EMPTY},
+	}
+	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
 			expected, parser.Lines)
 	}
@@ -194,7 +192,7 @@ Foo lyric lyric
 		{Text: "", Type: LineTypes.EMPTY, LineNumber: 3},
 		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, LineNumber: 4},
 	}
-	if !lineSlicesEqual(parser.Lines, expected) {
+	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n")
 		for _, line := range expected {
 			t.Errorf("  %#v\n", line)
@@ -203,5 +201,46 @@ Foo lyric lyric
 		for _, line := range parser.Lines {
 			t.Errorf("  %#v\n", line)
 		}
+	}
+}
+
+func TestMakeLetterRuns(t *testing.T) {
+	parts := makeLetterRuns("A B C")
+	expected := []LetterRun{
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
+		{Letters: "B", Type: LetterRunTypes.CHORDRUN},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
+		{Letters: "C", Type: LetterRunTypes.CHORDRUN},
+	}
+
+	if !reflect.DeepEqual(parts, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
+	}
+
+	parts = makeLetterRuns("A#m7b5 - BbDIM/F#|//|CmaJ7")
+	expected = []LetterRun{
+		{Letters: "A#m7b5", Type: LetterRunTypes.CHORDRUN},
+		{Letters: " - ", Type: LetterRunTypes.SEPARATORRUN},
+		{Letters: "BbDIM/F#", Type: LetterRunTypes.CHORDRUN},
+		{Letters: "|//|", Type: LetterRunTypes.SEPARATORRUN},
+		{Letters: "CmaJ7", Type: LetterRunTypes.CHORDRUN},
+	}
+
+	if !reflect.DeepEqual(parts, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
+	}
+
+	parts = makeLetterRuns("These abcdefgre lyrics")
+	expected = []LetterRun{
+		{Letters: "These", Type: LetterRunTypes.WORDRUN},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
+		{Letters: "abcdefgre", Type: LetterRunTypes.WORDRUN},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
+		{Letters: "lyrics", Type: LetterRunTypes.WORDRUN},
+	}
+
+	if !reflect.DeepEqual(parts, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
 	}
 }
