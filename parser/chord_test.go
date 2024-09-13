@@ -28,9 +28,19 @@ func TestChordCreation(t *testing.T) {
 		t.Errorf("Expected A#m7b5 chord, got %#v", c)
 	}
 
+	c = MakeChord("A#m7b5/C#")
+	if c.String() != "A#m7b5/C#" {
+		t.Errorf("Expected A#m7b5/C# chord, got %#v", c)
+	}
+
 	c = MakeChord("Abm6add9")
 	if c.String() != "Abm6add9" {
 		t.Errorf("Expected Abm6add9 chord, got %#v", c)
+	}
+
+	c = MakeChord("N.C.")
+	if c.String() != "" {
+		t.Errorf("Expected N.C. 'chord' to be empty, got %#v", c)
 	}
 }
 
@@ -38,7 +48,7 @@ func testStepUpChord(t *testing.T, note string, expected string) {
 	c := MakeChord(note)
 	c.StepUp()
 	if c.String() != expected {
-		t.Errorf("Expected %s chord from %s, got %#v", expected, note, c)
+		t.Errorf("Expected %s chord from %s, got %s", expected, note, c.String())
 	}
 }
 
@@ -46,7 +56,7 @@ func testStepDownChord(t *testing.T, note string, expected string) {
 	c := MakeChord(note)
 	c.StepDown()
 	if c.String() != expected {
-		t.Errorf("Expected %s chord from %s, got %#v", expected, note, c)
+		t.Errorf("Expected %s chord from %s, got %s", expected, note, c.String())
 	}
 }
 
@@ -67,6 +77,14 @@ func TestChordStepUp(t *testing.T) {
 	testStepUpChord(t, "Gb", "G")
 	testStepUpChord(t, "G", "G#")
 	testStepUpChord(t, "G#", "A")
+
+	testStepUpChord(t, "Gbm7b5", "Gm7b5")
+	testStepUpChord(t, "Gm", "G#m")
+	testStepUpChord(t, "G#sus4", "Asus4")
+
+	testStepUpChord(t, "Bbm7b5/Db", "Bm7b5/D")
+	testStepUpChord(t, "Bb/D#", "B/E")
+	testStepUpChord(t, "B/D#", "C/E")
 }
 
 func TestChordStepDown(t *testing.T) {
@@ -87,4 +105,12 @@ func TestChordStepDown(t *testing.T) {
 	testStepDownChord(t, "Gb", "F")
 	testStepDownChord(t, "G", "Gb")
 	testStepDownChord(t, "G#", "G")
+
+	testStepDownChord(t, "Gbm7b5", "Fm7b5")
+	testStepDownChord(t, "Gm", "Gbm")
+	testStepDownChord(t, "G#m", "Gm")
+
+	testStepDownChord(t, "Bm7b5/D", "Bbm7b5/Db")
+	testStepDownChord(t, "B/E", "Bb/Eb")
+	testStepDownChord(t, "C/E", "B/Eb")
 }

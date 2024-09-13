@@ -4,6 +4,7 @@ import "strings"
 
 type Chord struct {
 	Note       string
+	BassNote   *Chord
 	Accidental AccidentalType
 	Flavor     string
 }
@@ -52,7 +53,7 @@ func nextDown(note string) string {
 	return res
 }
 
-func (c Chord) String() string {
+func (c *Chord) String() string {
 	res := c.Note
 
 	if c.Accidental == AccidentalTypes.SHARP {
@@ -65,50 +66,89 @@ func (c Chord) String() string {
 
 	res += c.Flavor
 
+	if c.BassNote != nil {
+		res += "/" + c.BassNote.String()
+	}
+
 	return res
 }
 
 func MakeChord(original string) Chord {
 	res := Chord{}
-	original = strings.ToLower(original)
-	if original[0] < 'a' || original[0] > 'g' {
+	copyOfOriginal := strings.ToLower(original)
+
+	if copyOfOriginal == "n.c." {
 		return res
 	}
 
-	if len(original) == 1 {
-		res.Note = strings.ToUpper(original)
+	if strings.Count(copyOfOriginal, "/") > 1 {
+		return res
+	}
+
+	bassNote := ""
+	spot := strings.Index(copyOfOriginal, "/")
+	if spot != -1 {
+		bassNote = original[spot+1:]
+		copyOfOriginal = copyOfOriginal[:spot]
+	}
+
+	if copyOfOriginal[0] < 'a' || copyOfOriginal[0] > 'g' {
+		return res
+	}
+
+	if len(copyOfOriginal) == 1 {
+		res.Note = original[:1]
+		if bassNote != "" {
+			bassNoteChord := MakeChord(bassNote)
+			res.BassNote = &bassNoteChord
+		}
+
 		return res
 	}
 
 	start := 1
 	hasAccidental := false
-	if original[1] == 'b' || original[1] == '#' {
+	if copyOfOriginal[1] == 'b' || copyOfOriginal[1] == '#' {
 		start = 2
 		hasAccidental = true
 	}
 
-	res.Note = strings.ToUpper(original[:1])
-	if original[1] == '#' {
+	res.Note = original[:1]
+	if copyOfOriginal[1] == '#' {
 		res.Accidental = AccidentalTypes.SHARP
 	}
 
-	if original[1] == 'b' {
+	if copyOfOriginal[1] == 'b' {
 		res.Accidental = AccidentalTypes.FLAT
 	}
 
-	if hasAccidental && len(original) == 2 {
+	if hasAccidental && len(copyOfOriginal) == 2 {
+		if bassNote != "" {
+			bassNoteChord := MakeChord(bassNote)
+			res.BassNote = &bassNoteChord
+		}
+
 		return res
 	}
 
-	_, found := knownChordSuffixes[original[start:]]
+	_, found := knownChordSuffixes[copyOfOriginal[start:]]
 	if found {
-		res.Flavor = original[start:]
+		res.Flavor = copyOfOriginal[start:]
+	}
+
+	if bassNote != "" {
+		bassNoteChord := MakeChord(bassNote)
+		res.BassNote = &bassNoteChord
 	}
 
 	return res
 }
 
 func (c *Chord) StepUp() {
+	if c.BassNote != nil {
+		c.BassNote.StepUp()
+	}
+
 	if c.Note == "B" && c.Accidental == AccidentalTypes.NATURAL {
 		c.Note = "C"
 		return
@@ -131,6 +171,10 @@ func (c *Chord) StepUp() {
 }
 
 func (c *Chord) StepDown() {
+	if c.BassNote != nil {
+		c.BassNote.StepDown()
+	}
+
 	if c.Note == "C" && c.Accidental == AccidentalTypes.NATURAL {
 		c.Note = "B"
 		return
