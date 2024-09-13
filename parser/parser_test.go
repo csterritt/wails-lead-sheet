@@ -58,7 +58,11 @@ func TestAllAreChords(t *testing.T) {
 	}
 
 	if allAreChords(makeLetterRuns("Foo lyric dude")) {
-		t.Errorf("Non-chords found to be chords")
+		t.Errorf("Lyrics found to be chords")
+	}
+
+	if allAreChords(makeLetterRuns("aaa e/e/e/e/e fmm#g")) {
+		t.Errorf("Non-chords which have chord-allowed letters found to be chords")
 	}
 }
 

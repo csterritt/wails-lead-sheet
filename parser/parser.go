@@ -105,11 +105,12 @@ func isChord(s string) bool {
 func allAreChords(s []LetterRun) bool {
 	foundOneChord := false
 	allAreChordOrSeparators := lo.Reduce(s, func(agg bool, item LetterRun, _ int) bool {
-		if item.Type == LetterRunTypes.CHORDRUN {
+		isAChord := isChord(item.Letters)
+		if isAChord {
 			foundOneChord = true
 		}
 
-		return agg && item.Type == LetterRunTypes.CHORDRUN || agg && item.Type == LetterRunTypes.SEPARATORRUN
+		return agg && isAChord || agg && item.Type == LetterRunTypes.SEPARATORRUN
 	}, true)
 
 	return foundOneChord && allAreChordOrSeparators
