@@ -118,6 +118,14 @@ func allAreChords(s []LetterRun) bool {
 	return foundOneChord && allAreChordOrSeparators
 }
 
+func makeOneLetterRun(text string, typ LetterRunType) LetterRun {
+	if typ == LetterRunTypes.CHORDRUN {
+		return LetterRun{Letters: text, Type: typ, Chord: MakeChord(text)}
+	} else {
+		return LetterRun{Letters: text, Type: typ}
+	}
+}
+
 func makeLetterRuns(s string) []LetterRun {
 	res := make([]LetterRun, 0)
 
@@ -129,11 +137,7 @@ func makeLetterRuns(s string) []LetterRun {
 				currentText += string(s[index])
 			} else {
 				if len(currentText) > 0 {
-					if currentType == LetterRunTypes.CHORDRUN {
-						res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
-					} else {
-						res = append(res, LetterRun{Letters: currentText, Type: currentType})
-					}
+					res = append(res, makeOneLetterRun(currentText, currentType))
 				}
 				currentText = string(s[index])
 				currentType = LetterRunTypes.SEPARATORRUN
@@ -144,11 +148,7 @@ func makeLetterRuns(s string) []LetterRun {
 					currentText += string(s[index])
 				} else {
 					if len(currentText) > 0 {
-						if currentType == LetterRunTypes.CHORDRUN {
-							res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
-						} else {
-							res = append(res, LetterRun{Letters: currentText, Type: currentType})
-						}
+						res = append(res, makeOneLetterRun(currentText, currentType))
 					}
 					currentText = string(s[index])
 					currentType = LetterRunTypes.CHORDRUN
@@ -164,11 +164,7 @@ func makeLetterRuns(s string) []LetterRun {
 						currentText += string(s[index])
 					} else {
 						if len(currentText) > 0 {
-							if currentType == LetterRunTypes.CHORDRUN {
-								res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
-							} else {
-								res = append(res, LetterRun{Letters: currentText, Type: currentType})
-							}
+							res = append(res, makeOneLetterRun(currentText, currentType))
 						}
 						currentText = string(s[index])
 					}
@@ -179,11 +175,7 @@ func makeLetterRuns(s string) []LetterRun {
 	}
 
 	if len(currentText) > 0 {
-		if currentType == LetterRunTypes.CHORDRUN {
-			res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
-		} else {
-			res = append(res, LetterRun{Letters: currentText, Type: currentType})
-		}
+		res = append(res, makeOneLetterRun(currentText, currentType))
 	}
 
 	return res
