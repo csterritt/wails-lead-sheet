@@ -5,3 +5,4 @@ frontend/dist
 wails-tab
 try/
 tmp/
+coverage.out
