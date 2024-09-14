@@ -134,6 +134,8 @@ func MakeChord(original string) Chord {
 	_, found := knownChordSuffixes[copyOfOriginal[start:]]
 	if found {
 		res.Flavor = copyOfOriginal[start:]
+	} else {
+		return Chord{}
 	}
 
 	if bassNote != "" {

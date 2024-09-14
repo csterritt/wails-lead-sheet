@@ -1,6 +1,9 @@
 package parser
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestChordCreation(t *testing.T) {
 	c := MakeChord("A")
@@ -41,6 +44,27 @@ func TestChordCreation(t *testing.T) {
 	c = MakeChord("N.C.")
 	if c.String() != "" {
 		t.Errorf("Expected N.C. 'chord' to be empty, got %#v", c)
+	}
+
+	c = MakeChord("bogus")
+	if c.String() != "" {
+		t.Errorf("Expected bogus 'chord' to be empty, got %#v", c)
+	}
+
+	for _, suffix := range strings.Split(chordSuffixes, " ") {
+		for _, note := range []string{"A", "C#", "Gb"} {
+			pattern := note + suffix
+			c = MakeChord(pattern)
+			if c.String() != pattern {
+				t.Errorf("Expected example chord build for %s to succeed, got %#v", pattern, c)
+			}
+
+			pattern = note + suffix + "/F#"
+			c = MakeChord(pattern)
+			if c.String() != pattern {
+				t.Errorf("Expected example chord build for %s to succeed, got %#v", pattern, c)
+			}
+		}
 	}
 }
 
