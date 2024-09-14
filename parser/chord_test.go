@@ -6,7 +6,12 @@ import (
 )
 
 func TestChordCreation(t *testing.T) {
-	c := MakeChord("A")
+	c := MakeChord("")
+	if c.String() != "" {
+		t.Errorf("Expected Empty chord, got %#v", c)
+	}
+
+	c = MakeChord("A")
 	if c.String() != "A" {
 		t.Errorf("Expected A chord, got %#v", c)
 	}

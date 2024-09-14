@@ -10,13 +10,15 @@ import (
 const chordSuffixes = "m 7 5 dim dim7 aug sus sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj13 maj9#11 maj13#11 add9 6add9 maj7b5 maj7#5 m6 m9 m11 m13 madd9 m6add9 mmaj7 mmaj9 m7b5 m7#5 6 9 11 13 7b5 7#5 7b9 7"
 
 type LetterRun struct {
-	Letters string
 	Type    LetterRunType
+	Letters string
+	Chord   Chord
 }
 
 type Line struct {
 	LineNumber int
 	Text       string
+	Parts      []LetterRun
 	Type       LineType
 }
 
@@ -127,7 +129,11 @@ func makeLetterRuns(s string) []LetterRun {
 				currentText += string(s[index])
 			} else {
 				if len(currentText) > 0 {
-					res = append(res, LetterRun{Letters: currentText, Type: currentType})
+					if currentType == LetterRunTypes.CHORDRUN {
+						res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
+					} else {
+						res = append(res, LetterRun{Letters: currentText, Type: currentType})
+					}
 				}
 				currentText = string(s[index])
 				currentType = LetterRunTypes.SEPARATORRUN
@@ -138,7 +144,11 @@ func makeLetterRuns(s string) []LetterRun {
 					currentText += string(s[index])
 				} else {
 					if len(currentText) > 0 {
-						res = append(res, LetterRun{Letters: currentText, Type: currentType})
+						if currentType == LetterRunTypes.CHORDRUN {
+							res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
+						} else {
+							res = append(res, LetterRun{Letters: currentText, Type: currentType})
+						}
 					}
 					currentText = string(s[index])
 					currentType = LetterRunTypes.CHORDRUN
@@ -154,7 +164,11 @@ func makeLetterRuns(s string) []LetterRun {
 						currentText += string(s[index])
 					} else {
 						if len(currentText) > 0 {
-							res = append(res, LetterRun{Letters: currentText, Type: currentType})
+							if currentType == LetterRunTypes.CHORDRUN {
+								res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
+							} else {
+								res = append(res, LetterRun{Letters: currentText, Type: currentType})
+							}
 						}
 						currentText = string(s[index])
 					}
@@ -165,7 +179,11 @@ func makeLetterRuns(s string) []LetterRun {
 	}
 
 	if len(currentText) > 0 {
-		res = append(res, LetterRun{Letters: currentText, Type: currentType})
+		if currentType == LetterRunTypes.CHORDRUN {
+			res = append(res, LetterRun{Letters: currentText, Type: currentType, Chord: MakeChord(currentText)})
+		} else {
+			res = append(res, LetterRun{Letters: currentText, Type: currentType})
+		}
 	}
 
 	return res
@@ -185,19 +203,23 @@ func (p *ParsedContent) categorizeLines() error {
 		first, found := firstNonBlankChar(p.Lines[index].Text)
 		if found && first == '[' {
 			p.Lines[index].Type = LineTypes.SECTION
+			p.Lines[index].Parts = makeLetterRuns("")
 			continue
 		}
 
 		if !found {
 			p.Lines[index].Type = LineTypes.EMPTY
+			p.Lines[index].Parts = makeLetterRuns("")
 			continue
 		}
 
 		parts := makeLetterRuns(p.Lines[index].Text)
 		if allAreChords(parts) {
 			p.Lines[index].Type = LineTypes.CHORDS
+			p.Lines[index].Parts = parts
 		} else {
 			p.Lines[index].Type = LineTypes.LYRICS
+			p.Lines[index].Parts = makeLetterRuns("")
 		}
 	}
 	return nil

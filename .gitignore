@@ -4,3 +4,4 @@ frontend/dist
 .idea
 wails-tab
 try/
+tmp/

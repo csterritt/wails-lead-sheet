@@ -75,8 +75,11 @@ func (c *Chord) String() string {
 
 func MakeChord(original string) Chord {
 	res := Chord{}
-	copyOfOriginal := strings.ToLower(original)
+	if len(original) == 0 {
+		return res
+	}
 
+	copyOfOriginal := strings.ToLower(original)
 	if copyOfOriginal == "n.c." {
 		return res
 	}

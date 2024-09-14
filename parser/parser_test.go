@@ -79,12 +79,12 @@ func TestCategorizeLines(t *testing.T) {
 	}
 
 	expected := []Line{
-		{Text: "", Type: LineTypes.EMPTY},
-		{Text: "[Section]", Type: LineTypes.SECTION},
-		{Text: "   C   D   E", Type: LineTypes.CHORDS},
-		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
-		{Text: "a - B|C / / /| D E", Type: LineTypes.CHORDS},
-		{Text: "", Type: LineTypes.EMPTY},
+		{Text: "", Type: LineTypes.EMPTY, Parts: makeLetterRuns("")},
+		{Text: "[Section]", Type: LineTypes.SECTION, Parts: makeLetterRuns("")},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS, Parts: makeLetterRuns("   C   D   E")},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, Parts: makeLetterRuns("")},
+		{Text: "a - B|C / / /| D E", Type: LineTypes.CHORDS, Parts: makeLetterRuns("a - B|C / / /| D E")},
+		{Text: "", Type: LineTypes.EMPTY, Parts: makeLetterRuns("")},
 	}
 	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
@@ -113,13 +113,13 @@ Spoken line
 	}
 
 	expected := []Line{
-		{Text: "", Type: LineTypes.EMPTY},
-		{Text: "[Section]", Type: LineTypes.SECTION},
-		{Text: "   C   D   E", Type: LineTypes.CHORDS},
-		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
-		{Text: "N.C.   N.C.", Type: LineTypes.CHORDS},
-		{Text: "Spoken line", Type: LineTypes.LYRICS},
-		{Text: "", Type: LineTypes.EMPTY},
+		{Text: "", Type: LineTypes.EMPTY, Parts: makeLetterRuns("")},
+		{Text: "[Section]", Type: LineTypes.SECTION, Parts: makeLetterRuns("")},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS, Parts: makeLetterRuns("   C   D   E")},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, Parts: makeLetterRuns("")},
+		{Text: "N.C.   N.C.", Type: LineTypes.CHORDS, Parts: makeLetterRuns("N.C.   N.C.")},
+		{Text: "Spoken line", Type: LineTypes.LYRICS, Parts: makeLetterRuns("")},
+		{Text: "", Type: LineTypes.EMPTY, Parts: makeLetterRuns("")},
 	}
 	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
@@ -148,13 +148,13 @@ Line with sharp chords
 	}
 
 	expected := []Line{
-		{Text: "", Type: LineTypes.EMPTY},
-		{Text: "[Section]", Type: LineTypes.SECTION},
-		{Text: "   C   D   E", Type: LineTypes.CHORDS},
-		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS},
-		{Text: "C#m7       Asus2/C#        C#m7", Type: LineTypes.CHORDS},
-		{Text: "Line with sharp chords", Type: LineTypes.LYRICS},
-		{Text: "", Type: LineTypes.EMPTY},
+		{Text: "", Type: LineTypes.EMPTY, Parts: makeLetterRuns("")},
+		{Text: "[Section]", Type: LineTypes.SECTION, Parts: makeLetterRuns("")},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS, Parts: makeLetterRuns("   C   D   E")},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, Parts: makeLetterRuns("")},
+		{Text: "C#m7       Asus2/C#        C#m7", Type: LineTypes.CHORDS, Parts: makeLetterRuns("C#m7       Asus2/C#        C#m7")},
+		{Text: "Line with sharp chords", Type: LineTypes.LYRICS, Parts: makeLetterRuns("")},
+		{Text: "", Type: LineTypes.EMPTY, Parts: makeLetterRuns("")},
 	}
 	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n'%#v', got:\n'%#v'",
@@ -190,11 +190,11 @@ Foo lyric lyric
 	}
 
 	expected := []Line{
-		{Text: "[Section]", Type: LineTypes.SECTION, LineNumber: 0},
-		{Text: "", Type: LineTypes.EMPTY, LineNumber: 1},
-		{Text: "   C   D   E", Type: LineTypes.CHORDS, LineNumber: 2},
-		{Text: "", Type: LineTypes.EMPTY, LineNumber: 3},
-		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, LineNumber: 4},
+		{Text: "[Section]", Type: LineTypes.SECTION, LineNumber: 0, Parts: makeLetterRuns("")},
+		{Text: "", Type: LineTypes.EMPTY, LineNumber: 1, Parts: makeLetterRuns("")},
+		{Text: "   C   D   E", Type: LineTypes.CHORDS, LineNumber: 2, Parts: makeLetterRuns("   C   D   E")},
+		{Text: "", Type: LineTypes.EMPTY, LineNumber: 3, Parts: makeLetterRuns("")},
+		{Text: "Foo lyric lyric", Type: LineTypes.LYRICS, LineNumber: 4, Parts: makeLetterRuns("")},
 	}
 	if !reflect.DeepEqual(parser.Lines, expected) {
 		t.Errorf("Expected:\n")
@@ -211,11 +211,11 @@ Foo lyric lyric
 func TestMakeLetterRuns(t *testing.T) {
 	parts := makeLetterRuns("A B C")
 	expected := []LetterRun{
-		{Letters: "A", Type: LetterRunTypes.CHORDRUN},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
-		{Letters: "B", Type: LetterRunTypes.CHORDRUN},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
-		{Letters: "C", Type: LetterRunTypes.CHORDRUN},
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A")},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "B", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("B")},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "C", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("C")},
 	}
 
 	if !reflect.DeepEqual(parts, expected) {
@@ -224,11 +224,11 @@ func TestMakeLetterRuns(t *testing.T) {
 
 	parts = makeLetterRuns("A#m7b5 - BbDIM/F#|//|CmaJ7")
 	expected = []LetterRun{
-		{Letters: "A#m7b5", Type: LetterRunTypes.CHORDRUN},
-		{Letters: " - ", Type: LetterRunTypes.SEPARATORRUN},
-		{Letters: "BbDIM/F#", Type: LetterRunTypes.CHORDRUN},
-		{Letters: "|//|", Type: LetterRunTypes.SEPARATORRUN},
-		{Letters: "CmaJ7", Type: LetterRunTypes.CHORDRUN},
+		{Letters: "A#m7b5", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A#m7b5")},
+		{Letters: " - ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "BbDIM/F#", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("BbDIM/F#")},
+		{Letters: "|//|", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "CmaJ7", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("CmaJ7")},
 	}
 
 	if !reflect.DeepEqual(parts, expected) {
@@ -237,11 +237,11 @@ func TestMakeLetterRuns(t *testing.T) {
 
 	parts = makeLetterRuns("These abcdefgre lyrics")
 	expected = []LetterRun{
-		{Letters: "These", Type: LetterRunTypes.WORDRUN},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
-		{Letters: "abcdefgre", Type: LetterRunTypes.WORDRUN},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN},
-		{Letters: "lyrics", Type: LetterRunTypes.WORDRUN},
+		{Letters: "These", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "abcdefgre", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "lyrics", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
 	}
 
 	if !reflect.DeepEqual(parts, expected) {
