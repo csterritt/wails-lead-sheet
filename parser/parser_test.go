@@ -235,6 +235,16 @@ func TestMakeLetterRuns(t *testing.T) {
 		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
 	}
 
+	parts = makeLetterRuns("/ A")
+	expected = []LetterRun{
+		{Letters: "/ ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A")},
+	}
+
+	if !reflect.DeepEqual(parts, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
+	}
+
 	parts = makeLetterRuns("These abcdefgre lyrics")
 	expected = []LetterRun{
 		{Letters: "These", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
@@ -246,5 +256,17 @@ func TestMakeLetterRuns(t *testing.T) {
 
 	if !reflect.DeepEqual(parts, expected) {
 		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
+	}
+}
+
+func TestParseContent(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(parser.Lines) != 4 {
+		t.Errorf("Expected: 4 lines, Got: %d", len(parser.Lines))
 	}
 }

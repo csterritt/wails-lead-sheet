@@ -56,6 +56,11 @@ func TestChordCreation(t *testing.T) {
 		t.Errorf("Expected bogus 'chord' to be empty, got %#v", c)
 	}
 
+	c = MakeChord("zowi")
+	if c.String() != "" {
+		t.Errorf("Expected zowi 'chord' to be empty, got %#v", c)
+	}
+
 	for _, suffix := range strings.Split(chordSuffixes, " ") {
 		for _, note := range []string{"A", "C#", "Gb"} {
 			pattern := note + suffix

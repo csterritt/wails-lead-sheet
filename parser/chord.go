@@ -14,14 +14,10 @@ func nextUp(note string) string {
 	switch note {
 	case "A":
 		res = "B"
-	case "B":
-		res = "C"
 	case "C":
 		res = "D"
 	case "D":
 		res = "E"
-	case "E":
-		res = "F"
 	case "F":
 		res = "G"
 	case "G":
@@ -38,14 +34,10 @@ func nextDown(note string) string {
 		res = "G"
 	case "B":
 		res = "A"
-	case "C":
-		res = "B"
 	case "D":
 		res = "C"
 	case "E":
 		res = "D"
-	case "F":
-		res = "E"
 	case "G":
 		res = "F"
 	}
