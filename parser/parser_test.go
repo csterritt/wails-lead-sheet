@@ -320,3 +320,29 @@ func TestTransposeUpOneStep(t *testing.T) {
 		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
 	}
 }
+
+func TestTransposeDownOneStep(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.TransposeDownOneStep()
+
+	expected := []string{
+		"[Section]",
+		"   B   Db   Eb",
+		"Foo lyric lyric",
+		"ab - Bb|B / / /| Db Eb",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}

@@ -292,3 +292,17 @@ func (p *ParsedContent) TransposeUpOneStep() {
 		}
 	}
 }
+
+func (p *ParsedContent) TransposeDownOneStep() {
+	for lineIndex := range p.Lines {
+		if p.Lines[lineIndex].Type == LineTypes.CHORDS {
+			for partIndex := range p.Lines[lineIndex].Parts {
+				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
+					p.Lines[lineIndex].Parts[partIndex].Chord.StepDown()
+					p.Lines[lineIndex].Parts[partIndex].TransposedLetters =
+						p.Lines[lineIndex].Parts[partIndex].Chord.String()
+				}
+			}
+		}
+	}
+}
