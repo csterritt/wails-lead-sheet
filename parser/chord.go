@@ -3,11 +3,12 @@ package parser
 import "strings"
 
 type Chord struct {
-	Note       string
-	BassNote   *Chord
-	Accidental AccidentalType
-	Flavor     string
-	Original   string
+	Note               string
+	BassNote           *Chord
+	Accidental         AccidentalType
+	Flavor             string
+	OriginalString     string
+	OriginalAccidental AccidentalType
 }
 
 func nextUp(note string) string {
@@ -99,7 +100,8 @@ func MakeChord(original string) Chord {
 			res.BassNote = &bassNoteChord
 		}
 
-		res.Original = res.String()
+		res.OriginalString = res.String()
+		res.OriginalAccidental = res.Accidental
 
 		return res
 	}
@@ -126,7 +128,8 @@ func MakeChord(original string) Chord {
 			res.BassNote = &bassNoteChord
 		}
 
-		res.Original = res.String()
+		res.OriginalString = res.String()
+		res.OriginalAccidental = res.Accidental
 
 		return res
 	}
@@ -143,9 +146,15 @@ func MakeChord(original string) Chord {
 		res.BassNote = &bassNoteChord
 	}
 
-	res.Original = res.String()
+	res.OriginalString = res.String()
+	res.OriginalAccidental = res.Accidental
 
 	return res
+}
+
+func (c *Chord) Reset() {
+	c.Note = c.OriginalString
+	c.Accidental = c.OriginalAccidental
 }
 
 func (c *Chord) StepUp() {

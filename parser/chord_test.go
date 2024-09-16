@@ -11,8 +11,8 @@ func compareChordString(t *testing.T, source string, asString string, asOriginal
 		t.Errorf("Expected %#v String(), got String() %#v", asString, c.String())
 	}
 
-	if c.Original != asOriginal {
-		t.Errorf("Expected %#v original, got Original %#v", asOriginal, c.Original)
+	if c.OriginalString != asOriginal {
+		t.Errorf("Expected %#v original, got OriginalString %#v", asOriginal, c.OriginalString)
 	}
 }
 
@@ -117,4 +117,101 @@ func TestChordStepDown(t *testing.T) {
 	testStepDownChord(t, "Bm7b5/D", "Bbm7b5/Db")
 	testStepDownChord(t, "B/E", "Bb/Eb")
 	testStepDownChord(t, "C/E", "B/Eb")
+}
+
+func TestChordStepDownThenUp(t *testing.T) {
+	c := MakeChord("A")
+	c.StepDown()
+	if c.String() != "Ab" {
+		t.Errorf("Expected %s chord, got %s", "Ab", c.String())
+	}
+	c.StepDown()
+	if c.String() != "G" {
+		t.Errorf("Expected %s chord, got %s", "G", c.String())
+	}
+	c.StepDown()
+	if c.String() != "Gb" {
+		t.Errorf("Expected %s chord, got %s", "Gb", c.String())
+	}
+
+	c.StepUp()
+	if c.String() != "G" {
+		t.Errorf("Expected %s chord, got %s", "G", c.String())
+	}
+	c.StepUp()
+	if c.String() != "G#" {
+		t.Errorf("Expected %s chord, got %s", "G#", c.String())
+	}
+	c.StepUp()
+	if c.String() != "A" {
+		t.Errorf("Expected %s chord, got %s", "A", c.String())
+	}
+}
+
+func TestChordStepUpThenDown(t *testing.T) {
+	c := MakeChord("A")
+	c.StepUp()
+	if c.String() != "A#" {
+		t.Errorf("Expected %s chord, got %s", "A#", c.String())
+	}
+	c.StepUp()
+	if c.String() != "B" {
+		t.Errorf("Expected %s chord, got %s", "B", c.String())
+	}
+	c.StepUp()
+	if c.String() != "C" {
+		t.Errorf("Expected %s chord, got %s", "C", c.String())
+	}
+
+	c.StepDown()
+	if c.String() != "B" {
+		t.Errorf("Expected %s chord, got %s", "B", c.String())
+	}
+	c.StepDown()
+	if c.String() != "Bb" {
+		t.Errorf("Expected %s chord, got %s", "Bb", c.String())
+	}
+	c.StepDown()
+	if c.String() != "A" {
+		t.Errorf("Expected %s chord, got %s", "A", c.String())
+	}
+}
+
+func TestChordStepUpAnOctave(t *testing.T) {
+	c := MakeChord("A")
+
+	for range 12 {
+		c.StepUp()
+	}
+	if c.String() != "A" {
+		t.Errorf("Expected %s chord, got %s", "A", c.String())
+	}
+}
+
+func TestChordStepDownAnOctave(t *testing.T) {
+	c := MakeChord("A")
+
+	for range 12 {
+		c.StepDown()
+	}
+	if c.String() != "A" {
+		t.Errorf("Expected %s chord, got %s", "A", c.String())
+	}
+}
+
+func TestChordReset(t *testing.T) {
+	c := MakeChord("A")
+	c.StepDown()
+	c.Reset()
+
+	if c.String() != "A" {
+		t.Errorf("Expected %s chord, got %s", "A", c.String())
+	}
+
+	c.StepUp()
+	c.Reset()
+
+	if c.String() != "A" {
+		t.Errorf("Expected %s chord, got %s", "A", c.String())
+	}
 }
