@@ -270,3 +270,53 @@ func TestParseContent(t *testing.T) {
 		t.Errorf("Expected: 4 lines, Got: %d", len(parser.Lines))
 	}
 }
+
+func TestLineString(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := []string{
+		"[Section]",
+		"   C   D   E",
+		"Foo lyric lyric",
+		"a - B|C / / /| D E",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+func TestTransposeUpOneStep(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.TransposeUpOneStep()
+
+	expected := []string{
+		"[Section]",
+		"   C#   D#   F",
+		"Foo lyric lyric",
+		"a# - C|C# / / /| D# F",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}

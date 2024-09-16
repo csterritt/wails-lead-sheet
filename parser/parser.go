@@ -10,9 +10,10 @@ import (
 const chordSuffixes = "m 7 5 dim dim7 aug sus sus2 sus4 maj7 m7 7sus4 maj9 maj11 maj13 maj9#11 maj13#11 add9 6add9 maj7b5 maj7#5 m6 m9 m11 m13 madd9 m6add9 mmaj7 mmaj9 m7b5 m7#5 6 9 11 13 7b5 7#5 7b9 7"
 
 type LetterRun struct {
-	Type    LetterRunType
-	Letters string
-	Chord   Chord
+	Type              LetterRunType
+	Letters           string
+	Chord             Chord
+	TransposedLetters string
 }
 
 type Line struct {
@@ -20,6 +21,23 @@ type Line struct {
 	Text       string
 	Parts      []LetterRun
 	Type       LineType
+}
+
+func (line Line) String() string {
+	if line.Type == LineTypes.CHORDS {
+		res := ""
+		for _, part := range line.Parts {
+			if part.TransposedLetters != "" {
+				res += part.TransposedLetters
+			} else {
+				res += part.Letters
+			}
+		}
+
+		return res
+	}
+
+	return line.Text
 }
 
 type ParsedContent struct {
@@ -259,4 +277,18 @@ func (p *ParsedContent) ParseContent(content string) error {
 	}
 
 	return nil
+}
+
+func (p *ParsedContent) TransposeUpOneStep() {
+	for lineIndex := range p.Lines {
+		if p.Lines[lineIndex].Type == LineTypes.CHORDS {
+			for partIndex := range p.Lines[lineIndex].Parts {
+				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
+					p.Lines[lineIndex].Parts[partIndex].Chord.StepUp()
+					p.Lines[lineIndex].Parts[partIndex].TransposedLetters =
+						p.Lines[lineIndex].Parts[partIndex].Chord.String()
+				}
+			}
+		}
+	}
 }
