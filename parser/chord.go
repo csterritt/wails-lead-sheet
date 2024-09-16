@@ -7,6 +7,7 @@ type Chord struct {
 	BassNote   *Chord
 	Accidental AccidentalType
 	Flavor     string
+	Original   string
 }
 
 func nextUp(note string) string {
@@ -92,11 +93,13 @@ func MakeChord(original string) Chord {
 	}
 
 	if len(copyOfOriginal) == 1 {
-		res.Note = original[:1]
+		res.Note = strings.ToUpper(original[:1])
 		if bassNote != "" {
 			bassNoteChord := MakeChord(bassNote)
 			res.BassNote = &bassNoteChord
 		}
+
+		res.Original = res.String()
 
 		return res
 	}
@@ -108,7 +111,7 @@ func MakeChord(original string) Chord {
 		hasAccidental = true
 	}
 
-	res.Note = original[:1]
+	res.Note = strings.ToUpper(original[:1])
 	if copyOfOriginal[1] == '#' {
 		res.Accidental = AccidentalTypes.SHARP
 	}
@@ -122,6 +125,8 @@ func MakeChord(original string) Chord {
 			bassNoteChord := MakeChord(bassNote)
 			res.BassNote = &bassNoteChord
 		}
+
+		res.Original = res.String()
 
 		return res
 	}
@@ -137,6 +142,8 @@ func MakeChord(original string) Chord {
 		bassNoteChord := MakeChord(bassNote)
 		res.BassNote = &bassNoteChord
 	}
+
+	res.Original = res.String()
 
 	return res
 }

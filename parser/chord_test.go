@@ -5,66 +5,36 @@ import (
 	"testing"
 )
 
+func compareChordString(t *testing.T, source string, asString string, asOriginal string) {
+	c := MakeChord(source)
+	if c.String() != asString {
+		t.Errorf("Expected %#v String(), got String() %#v", asString, c.String())
+	}
+
+	if c.Original != asOriginal {
+		t.Errorf("Expected %#v original, got Original %#v", asOriginal, c.Original)
+	}
+}
+
 func TestChordCreation(t *testing.T) {
-	c := MakeChord("")
-	if c.String() != "" {
-		t.Errorf("Expected Empty chord, got %#v", c)
-	}
-
-	c = MakeChord("A")
-	if c.String() != "A" {
-		t.Errorf("Expected A chord, got %#v", c)
-	}
-
-	c = MakeChord("A#")
-	if c.String() != "A#" {
-		t.Errorf("Expected A# chord, got %#v", c)
-	}
-
-	c = MakeChord("Ab")
-	if c.String() != "Ab" {
-		t.Errorf("Expected Ab chord, got %#v", c)
-	}
-
-	c = MakeChord("Am")
-	if c.String() != "Am" {
-		t.Errorf("Expected Am chord, got %#v", c)
-	}
-
-	c = MakeChord("A#m7b5")
-	if c.String() != "A#m7b5" {
-		t.Errorf("Expected A#m7b5 chord, got %#v", c)
-	}
-
-	c = MakeChord("A#m7b5/C#")
-	if c.String() != "A#m7b5/C#" {
-		t.Errorf("Expected A#m7b5/C# chord, got %#v", c)
-	}
-
-	c = MakeChord("Abm6add9")
-	if c.String() != "Abm6add9" {
-		t.Errorf("Expected Abm6add9 chord, got %#v", c)
-	}
-
-	c = MakeChord("N.C.")
-	if c.String() != "" {
-		t.Errorf("Expected N.C. 'chord' to be empty, got %#v", c)
-	}
-
-	c = MakeChord("bogus")
-	if c.String() != "" {
-		t.Errorf("Expected bogus 'chord' to be empty, got %#v", c)
-	}
-
-	c = MakeChord("zowi")
-	if c.String() != "" {
-		t.Errorf("Expected zowi 'chord' to be empty, got %#v", c)
-	}
+	compareChordString(t, "", "", "")
+	compareChordString(t, "a", "A", "A")
+	compareChordString(t, "a/c#", "A/C#", "A/C#")
+	compareChordString(t, "A", "A", "A")
+	compareChordString(t, "A#", "A#", "A#")
+	compareChordString(t, "Ab", "Ab", "Ab")
+	compareChordString(t, "Am", "Am", "Am")
+	compareChordString(t, "A#m7b5", "A#m7b5", "A#m7b5")
+	compareChordString(t, "A#m7b5/C#", "A#m7b5/C#", "A#m7b5/C#")
+	compareChordString(t, "Abm6add9", "Abm6add9", "Abm6add9")
+	compareChordString(t, "N.C.", "", "")
+	compareChordString(t, "bogus", "", "")
+	compareChordString(t, "zowi", "", "")
 
 	for _, suffix := range strings.Split(chordSuffixes, " ") {
 		for _, note := range []string{"A", "C#", "Gb"} {
 			pattern := note + suffix
-			c = MakeChord(pattern)
+			c := MakeChord(pattern)
 			if c.String() != pattern {
 				t.Errorf("Expected example chord build for %s to succeed, got %#v", pattern, c)
 			}
