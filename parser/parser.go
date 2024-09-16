@@ -12,6 +12,7 @@ const chordSuffixes = "m 7 5 dim dim7 aug sus sus2 sus4 maj7 m7 7sus4 maj9 maj11
 type LetterRun struct {
 	Type              LetterRunType
 	Letters           string
+	OriginalLetters   string
 	Chord             Chord
 	TransposedLetters string
 }
@@ -166,7 +167,11 @@ func makeLetterRuns(s string) []LetterRun {
 					currentText += string(s[index])
 				} else {
 					if len(currentText) > 0 {
-						res = append(res, makeOneLetterRun(currentText, currentType))
+						run := makeOneLetterRun(currentText, currentType)
+						if run.Type == LetterRunTypes.SEPARATORRUN {
+							run.OriginalLetters = currentText
+						}
+						res = append(res, run)
 					}
 					currentText = string(s[index])
 					currentType = LetterRunTypes.CHORDRUN
@@ -182,7 +187,11 @@ func makeLetterRuns(s string) []LetterRun {
 						currentText += string(s[index])
 					} else {
 						if len(currentText) > 0 {
-							res = append(res, makeOneLetterRun(currentText, currentType))
+							run := makeOneLetterRun(currentText, currentType)
+							if run.Type == LetterRunTypes.SEPARATORRUN {
+								run.OriginalLetters = currentText
+							}
+							res = append(res, run)
 						}
 						currentText = string(s[index])
 					}
@@ -193,7 +202,11 @@ func makeLetterRuns(s string) []LetterRun {
 	}
 
 	if len(currentText) > 0 {
-		res = append(res, makeOneLetterRun(currentText, currentType))
+		run := makeOneLetterRun(currentText, currentType)
+		if run.Type == LetterRunTypes.SEPARATORRUN {
+			run.OriginalLetters = currentText
+		}
+		res = append(res, run)
 	}
 
 	return res
@@ -283,10 +296,32 @@ func (p *ParsedContent) TransposeUpOneStep() {
 	for lineIndex := range p.Lines {
 		if p.Lines[lineIndex].Type == LineTypes.CHORDS {
 			for partIndex := range p.Lines[lineIndex].Parts {
+				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.SEPARATORRUN {
+					p.Lines[lineIndex].Parts[partIndex].Letters = p.Lines[lineIndex].Parts[partIndex].OriginalLetters
+				}
+			}
+
+			longer := make([]int, 0)
+			for partIndex := range p.Lines[lineIndex].Parts {
 				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
 					p.Lines[lineIndex].Parts[partIndex].Chord.StepUp()
-					p.Lines[lineIndex].Parts[partIndex].TransposedLetters =
-						p.Lines[lineIndex].Parts[partIndex].Chord.String()
+					newLetters := p.Lines[lineIndex].Parts[partIndex].Chord.String()
+					p.Lines[lineIndex].Parts[partIndex].TransposedLetters = newLetters
+
+					if len(newLetters) > len(p.Lines[lineIndex].Parts[partIndex].Chord.OriginalString) {
+						longer = append(longer, partIndex)
+					}
+				}
+			}
+
+			for _, index := range longer {
+				if index < len(p.Lines[lineIndex].Parts)-1 {
+					if p.Lines[lineIndex].Parts[index+1].Type == LetterRunTypes.SEPARATORRUN {
+						text := p.Lines[lineIndex].Parts[index+1].Letters
+						if len(text) > 1 && text[0] == ' ' && text[1] == ' ' {
+							p.Lines[lineIndex].Parts[index+1].Letters = p.Lines[lineIndex].Parts[index+1].Letters[1:]
+						}
+					}
 				}
 			}
 		}
@@ -297,10 +332,32 @@ func (p *ParsedContent) TransposeDownOneStep() {
 	for lineIndex := range p.Lines {
 		if p.Lines[lineIndex].Type == LineTypes.CHORDS {
 			for partIndex := range p.Lines[lineIndex].Parts {
+				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.SEPARATORRUN {
+					p.Lines[lineIndex].Parts[partIndex].Letters = p.Lines[lineIndex].Parts[partIndex].OriginalLetters
+				}
+			}
+
+			longer := make([]int, 0)
+			for partIndex := range p.Lines[lineIndex].Parts {
 				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
 					p.Lines[lineIndex].Parts[partIndex].Chord.StepDown()
-					p.Lines[lineIndex].Parts[partIndex].TransposedLetters =
-						p.Lines[lineIndex].Parts[partIndex].Chord.String()
+					newLetters := p.Lines[lineIndex].Parts[partIndex].Chord.String()
+					p.Lines[lineIndex].Parts[partIndex].TransposedLetters = newLetters
+
+					if len(newLetters) > len(p.Lines[lineIndex].Parts[partIndex].Chord.OriginalString) {
+						longer = append(longer, partIndex)
+					}
+				}
+			}
+
+			for _, index := range longer {
+				if index < len(p.Lines[lineIndex].Parts)-1 {
+					if p.Lines[lineIndex].Parts[index+1].Type == LetterRunTypes.SEPARATORRUN {
+						text := p.Lines[lineIndex].Parts[index+1].Letters
+						if len(text) > 1 && text[0] == ' ' && text[1] == ' ' {
+							p.Lines[lineIndex].Parts[index+1].Letters = p.Lines[lineIndex].Parts[index+1].Letters[1:]
+						}
+					}
 				}
 			}
 		}

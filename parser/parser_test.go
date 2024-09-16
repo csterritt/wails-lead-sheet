@@ -15,6 +15,14 @@ Foo lyric lyric
 a - B|C / / /| D E
 `
 
+func verifyLetterRun(t *testing.T, input string, expected []LetterRun) {
+	parts := makeLetterRuns(input)
+
+	if !reflect.DeepEqual(parts, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
+	}
+}
+
 func TestImportContent(t *testing.T) {
 	expected := lo.Map([]string{"", "[Section]", "   C   D   E", "Foo lyric lyric", "a - B|C / / /| D E", ""}, func(s string, _ int) Line {
 		return Line{Text: s, Type: LineTypes.TEXT}
@@ -209,51 +217,53 @@ Foo lyric lyric
 }
 
 func TestMakeLetterRuns(t *testing.T) {
-	parts := makeLetterRuns("A B C")
+	verifyLetterRun(t, "A B C", []LetterRun{
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A"), OriginalLetters: ""},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " "},
+		{Letters: "B", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("B"), OriginalLetters: ""},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " "},
+		{Letters: "C", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("C"), OriginalLetters: ""},
+	})
+
+	verifyLetterRun(t, "A#m7b5 - BbDIM/F#|//|CmaJ7", []LetterRun{
+		{Letters: "A#m7b5", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A#m7b5"), OriginalLetters: ""},
+		{Letters: " - ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " - "},
+		{Letters: "BbDIM/F#", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("BbDIM/F#"), OriginalLetters: ""},
+		{Letters: "|//|", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: "|//|"},
+		{Letters: "CmaJ7", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("CmaJ7"), OriginalLetters: ""},
+	})
+
+	verifyLetterRun(t, "/ A", []LetterRun{
+		{Letters: "/ ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: "/ "},
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A"), OriginalLetters: ""},
+	})
+
+	verifyLetterRun(t, "A /", []LetterRun{
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A"), OriginalLetters: ""},
+		{Letters: " /", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " /"},
+	})
+
+	verifyLetterRun(t, "/ A /", []LetterRun{
+		{Letters: "/ ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: "/ "},
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A"), OriginalLetters: ""},
+		{Letters: " /", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " /"},
+	})
+
+	verifyLetterRun(t, "These abcdefgre lyrics", []LetterRun{
+		{Letters: "These", Type: LetterRunTypes.WORDRUN, Chord: MakeChord(""), OriginalLetters: ""},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " "},
+		{Letters: "abcdefgre", Type: LetterRunTypes.WORDRUN, Chord: MakeChord(""), OriginalLetters: ""},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " "},
+		{Letters: "lyrics", Type: LetterRunTypes.WORDRUN, Chord: MakeChord(""), OriginalLetters: ""},
+	})
+
+	parts := makeLetterRuns(". A")
 	expected := []LetterRun{
-		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A")},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "B", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("B")},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "C", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("C")},
+		// TODO: Someday: Maybe: Make a lone '.' (or lone '#') not be a chord.
+		{Letters: ".", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord(""), OriginalLetters: ""},
+		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord(""), OriginalLetters: " "},
+		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A"), OriginalLetters: ""},
 	}
-
-	if !reflect.DeepEqual(parts, expected) {
-		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
-	}
-
-	parts = makeLetterRuns("A#m7b5 - BbDIM/F#|//|CmaJ7")
-	expected = []LetterRun{
-		{Letters: "A#m7b5", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A#m7b5")},
-		{Letters: " - ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "BbDIM/F#", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("BbDIM/F#")},
-		{Letters: "|//|", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "CmaJ7", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("CmaJ7")},
-	}
-
-	if !reflect.DeepEqual(parts, expected) {
-		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
-	}
-
-	parts = makeLetterRuns("/ A")
-	expected = []LetterRun{
-		{Letters: "/ ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "A", Type: LetterRunTypes.CHORDRUN, Chord: MakeChord("A")},
-	}
-
-	if !reflect.DeepEqual(parts, expected) {
-		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
-	}
-
-	parts = makeLetterRuns("These abcdefgre lyrics")
-	expected = []LetterRun{
-		{Letters: "These", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "abcdefgre", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
-		{Letters: " ", Type: LetterRunTypes.SEPARATORRUN, Chord: MakeChord("")},
-		{Letters: "lyrics", Type: LetterRunTypes.WORDRUN, Chord: MakeChord("")},
-	}
-
 	if !reflect.DeepEqual(parts, expected) {
 		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, parts)
 	}
@@ -306,9 +316,9 @@ func TestTransposeUpOneStep(t *testing.T) {
 
 	expected := []string{
 		"[Section]",
-		"   C#   D#   F",
+		"   C#  D#  F",
 		"Foo lyric lyric",
-		"a# - C|C# / / /| D# F",
+		"A# - C|C# / / /| D# F",
 	}
 
 	asString := make([]string, len(parser.Lines))
@@ -332,9 +342,123 @@ func TestTransposeDownOneStep(t *testing.T) {
 
 	expected := []string{
 		"[Section]",
-		"   B   Db   Eb",
+		"   B   Db  Eb",
 		"Foo lyric lyric",
-		"ab - Bb|B / / /| Db Eb",
+		"Ab - Bb|B / / /| Db Eb",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+func TestTransposeUpThenDownOneStep(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.TransposeUpOneStep()
+	parser.TransposeDownOneStep()
+
+	expected := []string{
+		"[Section]",
+		"   C   D   E",
+		"Foo lyric lyric",
+		"A - B|C / / /| D E",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+func TestTransposeDownThenUpAFew(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.TransposeDownOneStep()
+	parser.TransposeDownOneStep()
+	parser.TransposeDownOneStep()
+	parser.TransposeUpOneStep()
+	parser.TransposeUpOneStep()
+	parser.TransposeUpOneStep()
+
+	expected := []string{
+		"[Section]",
+		"   C   D   E",
+		"Foo lyric lyric",
+		"A - B|C / / /| D E",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+func TestTransposeDownAnOctave(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for range 12 {
+		parser.TransposeDownOneStep()
+	}
+
+	expected := []string{
+		"[Section]",
+		"   C   D   E",
+		"Foo lyric lyric",
+		"A - B|C / / /| D E",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+func TestTransposeUpAnOctave(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for range 12 {
+		parser.TransposeUpOneStep()
+	}
+
+	expected := []string{
+		"[Section]",
+		"   C   D   E",
+		"Foo lyric lyric",
+		"A - B|C / / /| D E",
 	}
 
 	asString := make([]string, len(parser.Lines))
