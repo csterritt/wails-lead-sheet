@@ -31,6 +31,7 @@ type ParsedContent struct {
 var knownChordSuffixes map[string]bool
 
 var chordLetters map[rune]bool
+var nextChordLetter map[rune]rune
 var separators map[rune]bool
 
 func init() {
@@ -48,6 +49,17 @@ func init() {
 
 	for _, ch := range "abcdefg#n." {
 		chordLetters[ch] = true
+	}
+
+	nextChordLetter = make(map[rune]rune)
+	for _, ch := range "ABCDEFG" {
+		chordLetters[ch] = true
+
+		if ch < 'G' {
+			nextChordLetter[ch] = ch + 1
+		} else {
+			nextChordLetter[ch] = 'A'
+		}
 	}
 
 	separators = make(map[rune]bool)
@@ -380,6 +392,30 @@ func (p *ParsedContent) TransposeDownOneStep() {
 			for _, index := range shorter {
 				if index < len(p.Lines[lineIndex].Parts)-1 {
 					p.Lines[lineIndex].Parts[index].TransposedLetters = p.Lines[lineIndex].Parts[index].TransposedLetters + " "
+				}
+			}
+		}
+	}
+}
+
+func (p *ParsedContent) SwitchToNNS(key string) {
+	remap := make(map[string]string)
+	keyCh := ([]rune(key))[0]
+	numCh := '1'
+	for range 7 {
+		nextCh := nextChordLetter[keyCh]
+		remap[string(keyCh)] = string(numCh)
+		keyCh = nextCh
+		numCh += 1
+	}
+
+	for lineIndex := range p.Lines {
+		if p.Lines[lineIndex].Type == LineTypes.CHORDS {
+			for partIndex := range p.Lines[lineIndex].Parts {
+				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
+					first := strings.ToUpper(p.Lines[lineIndex].Parts[partIndex].Letters[:1])
+					rest := p.Lines[lineIndex].Parts[partIndex].Letters[1:]
+					p.Lines[lineIndex].Parts[partIndex].TransposedLetters = remap[first] + rest
 				}
 			}
 		}

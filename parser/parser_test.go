@@ -15,6 +15,11 @@ Foo lyric lyric
 a - B|C / / /| D E
 `
 
+const longContent = "[Section]\n" +
+	"   C#  D#  F\n" +
+	"Foo lyric lyric\n" +
+	"A# - C|C# / / /| D# F\n"
+
 func verifyLetterRun(t *testing.T, input string, expected []LetterRun) {
 	parts := makeLetterRuns(input)
 
@@ -333,10 +338,7 @@ func TestTransposeUpOneStep(t *testing.T) {
 
 func TestTransposeUpOneStepGettingShorter(t *testing.T) {
 	parser := ParsedContent{}
-	longContent := "[Section]\n" +
-		"   C#  D#  F\n" +
-		"Foo lyric lyric\n" +
-		"A# - C|C# / / /| D# F\n"
+
 	err := parser.ParseContent(longContent)
 	if err != nil {
 		t.Error(err)
@@ -530,3 +532,65 @@ func TestTransposeUpAnOctave(t *testing.T) {
 		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
 	}
 }
+
+func TestSwitchToNNSFromC(t *testing.T) {
+	parser := ParsedContent{}
+	err := parser.ParseContent(content)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.SwitchToNNS("C")
+
+	expected := []string{
+		"[Section]",
+		"   1   2   3",
+		"Foo lyric lyric",
+		"6 - 7|1 / / /| 2 3",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+/*
+longContent := "[Section]\n" +
+		"   C#  D#  F\n" +
+		"Foo lyric lyric\n" +
+		"A# - C|C# / / /| D# F\n"
+
+Eb F G Ab Bb C D
+1  2 3 4  5  6 7
+*/
+
+//func TestSwitchToNNSFromEb(t *testing.T) {
+//	parser := ParsedContent{}
+//	err := parser.ParseContent(longContent)
+//	if err != nil {
+//		t.Error(err)
+//	}
+//
+//	parser.SwitchToNNS("Eb")
+//
+//	expected := []string{
+//		"[Section]",
+//		"   6#   5#   2",
+//		"Foo lyric lyric",
+//		"5 - 6|6# / / /| 7# 2",
+//	}
+//
+//	asString := make([]string, len(parser.Lines))
+//	for index, line := range parser.Lines {
+//		asString[index] = line.String()
+//	}
+//
+//	if !reflect.DeepEqual(asString, expected) {
+//		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+//	}
+//}
