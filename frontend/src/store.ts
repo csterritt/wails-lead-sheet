@@ -17,13 +17,17 @@ type Content = {
 export const useContentStore = defineStore('counter', () => {
   const currentFileName = ref('')
   const currentFileContent: Ref<Content> = ref({ Lines: [] })
+  const currentKey: Ref<string> = ref('-')
   const errorMessage = ref('')
+  const fileLoaded = ref(false)
   const loading = ref(false)
 
   const retrieveFile = async () => {
+    currentKey.value = '-'
     const fileOpened = await ChooseFile()
     if (fileOpened == null || fileOpened.length === 0) {
       currentFileName.value = 'No file selected?'
+      fileLoaded.value = false
     } else {
       loading.value = true
       currentFileName.value = fileOpened
@@ -32,12 +36,10 @@ export const useContentStore = defineStore('counter', () => {
       try {
         content = await RetrieveFileContents(currentFileName.value)
         currentFileContent.value = content
-
-        LogPrint(
-          `current file content: ${JSON.stringify(currentFileContent.value, null, 2)}`
-        )
+        fileLoaded.value = true
       } catch (err: any) {
         errorMessage.value = err.toString()
+        fileLoaded.value = false
         LogPrint(
           `error caught during file open: ${JSON.stringify(errorMessage.value, null, 2)}`
         )
@@ -65,10 +67,15 @@ export const useContentStore = defineStore('counter', () => {
     return res
   })
 
+  const keyChosen = computed(() => currentKey.value !== '-')
+
   return {
     currentFileName,
     currentFileContent,
+    currentKey,
     errorMessage,
+    fileLoaded,
+    keyChosen,
     lineClass,
     loading,
     retrieveFile,
