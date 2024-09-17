@@ -53,10 +53,11 @@
 
         <div class="flex flex-row items-center space-x-2 text-xl">
           <span class="font-bold">Transpose:</span>
-          <button class="btn btn-sm btn-primary" :disabled="!store.keyChosen">
+          <button class="btn btn-sm btn-primary" @click="store.transposeUp">
             Up
           </button>
-          <button class="btn btn-sm btn-primary" :disabled="!store.keyChosen">
+
+          <button class="btn btn-sm btn-primary" @click="store.transposeDown">
             Down
           </button>
         </div>

@@ -24,23 +24,6 @@ type Line struct {
 	Type       LineType
 }
 
-func (line Line) String() string {
-	if line.Type == LineTypes.CHORDS {
-		res := ""
-		for _, part := range line.Parts {
-			if part.TransposedLetters != "" {
-				res += part.TransposedLetters
-			} else {
-				res += part.Letters
-			}
-		}
-
-		return res
-	}
-
-	return line.Text
-}
-
 type ParsedContent struct {
 	Lines []Line
 }
@@ -73,6 +56,23 @@ func init() {
 			separators[ch] = true
 		}
 	}
+}
+
+func (line Line) String() string {
+	if line.Type == LineTypes.CHORDS {
+		res := ""
+		for _, part := range line.Parts {
+			if part.TransposedLetters != "" {
+				res += part.TransposedLetters
+			} else {
+				res += part.Letters
+			}
+		}
+
+		return res
+	}
+
+	return line.Text
 }
 
 func firstNonBlankChar(s string) (rune, bool) {

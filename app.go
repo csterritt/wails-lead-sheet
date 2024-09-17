@@ -53,16 +53,31 @@ func (a *App) ChooseFile() string {
 
 // RetrieveFileContents retrieves the contents from the given file path
 func (a *App) RetrieveFileContents(filePath string) (parser.ParsedContent, error) {
+	prsr := parser.ParsedContent{}
 	contents, err := os.ReadFile(filePath)
 	if err != nil {
 		runtime.LogPrintf(a.ctx, "Retrieve contents of %s contains caught %v\n", filePath, err)
+		return prsr, err
 	}
 
-	prsr := parser.ParsedContent{}
 	err = prsr.ParseContent(string(contents))
 	if err != nil {
 		return prsr, err
 	}
 
 	return prsr, nil
+}
+
+// TransposeUpOneStep transposes the given content up one step
+func (a *App) TransposeUpOneStep(content parser.ParsedContent) parser.ParsedContent {
+	content.TransposeUpOneStep()
+
+	return content
+}
+
+// TransposeDownOneStep transposes the given content down one step
+func (a *App) TransposeDownOneStep(content parser.ParsedContent) parser.ParsedContent {
+	content.TransposeDownOneStep()
+
+	return content
 }

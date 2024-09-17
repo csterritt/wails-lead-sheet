@@ -5,3 +5,7 @@ import {parser} from '../models';
 export function ChooseFile():Promise<string>;
 
 export function RetrieveFileContents(arg1:string):Promise<parser.ParsedContent>;
+
+export function TransposeDownOneStep(arg1:parser.ParsedContent):Promise<parser.ParsedContent>;
+
+export function TransposeUpOneStep(arg1:parser.ParsedContent):Promise<parser.ParsedContent>;

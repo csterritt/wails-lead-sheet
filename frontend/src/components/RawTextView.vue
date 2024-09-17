@@ -1,10 +1,13 @@
 <template>
-  <div v-if="store.currentFileContent == null" class="italic">
-    No content yet (open a file)
+  <div
+    v-if="fileContent == null || fileContent.Lines.length === 0"
+    class="italic"
+  >
+    {{ message }}
   </div>
 
   <div v-else class="font-monoslab">
-    <div v-for="line in store.currentFileContent.Lines" :key="line.LineNumber">
+    <div v-for="line in fileContent.Lines" :key="line.LineNumber">
       <div :class="lineClass(line.LineNumber)">
         <span class="w-6">{{ line.LineNumber + 1 }}</span>
         <pre>{{ line.Text }}</pre>
@@ -17,6 +20,11 @@
 import { storeToRefs } from 'pinia'
 
 import { useContentStore } from '../store'
+
+const props = defineProps({
+  fileContent: { type: Object, required: true },
+  message: { type: String, required: true },
+})
 
 const store = useContentStore()
 

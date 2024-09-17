@@ -9,3 +9,11 @@ export function ChooseFile() {
 export function RetrieveFileContents(arg1) {
   return window['go']['main']['App']['RetrieveFileContents'](arg1);
 }
+
+export function TransposeDownOneStep(arg1) {
+  return window['go']['main']['App']['TransposeDownOneStep'](arg1);
+}
+
+export function TransposeUpOneStep(arg1) {
+  return window['go']['main']['App']['TransposeUpOneStep'](arg1);
+}
