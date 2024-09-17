@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 import {
   ChooseFile,
+  ExportToClipboard,
   RetrieveFileContents,
   TransposeDownOneStep,
   TransposeUpOneStep,
@@ -131,11 +132,22 @@ export const useContentStore = defineStore('counter', () => {
     processedFileContent.value = processTransposedLines(res)
   }
 
+  const exportToClipboard = async () => {
+    const err = await ExportToClipboard(processedFileContent.value)
+    if (err != '') {
+      LogPrint(
+        `error caught during export to clipboard: ${JSON.stringify(err, null, 2)}`
+      )
+      errorMessage.value = err
+    }
+  }
+
   return {
     currentFileName,
     currentFileContent,
     currentKey,
     errorMessage,
+    exportToClipboard,
     fileLoaded,
     keyChosen,
     lineClass,

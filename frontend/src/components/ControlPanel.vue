@@ -65,6 +65,10 @@
         <button class="btn btn-sm btn-primary" :disabled="!store.keyChosen">
           Change to NNS
         </button>
+
+        <button class="btn btn-sm btn-primary" @click="store.exportToClipboard">
+          Export to clipboard
+        </button>
       </template>
     </div>
   </div>

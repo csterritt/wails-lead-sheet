@@ -6,6 +6,10 @@ export function ChooseFile() {
   return window['go']['main']['App']['ChooseFile']();
 }
 
+export function ExportToClipboard(arg1) {
+  return window['go']['main']['App']['ExportToClipboard'](arg1);
+}
+
 export function RetrieveFileContents(arg1) {
   return window['go']['main']['App']['RetrieveFileContents'](arg1);
 }

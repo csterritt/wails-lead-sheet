@@ -81,3 +81,18 @@ func (a *App) TransposeDownOneStep(content parser.ParsedContent) parser.ParsedCo
 
 	return content
 }
+
+// ExportToClipboard exports the given content to the clipboard
+func (a *App) ExportToClipboard(content parser.ParsedContent) string {
+	output := ""
+	for _, line := range content.Lines {
+		output += line.Text + "\n"
+	}
+	err := runtime.ClipboardSetText(a.ctx, output)
+	if err != nil {
+		runtime.LogPrintf(a.ctx, "ExportToClipboard caught error %v\n", err)
+		return err.Error()
+	}
+
+	return ""
+}
