@@ -302,6 +302,7 @@ func (p *ParsedContent) TransposeUpOneStep() {
 			}
 
 			longer := make([]int, 0)
+			shorter := make([]int, 0)
 			for partIndex := range p.Lines[lineIndex].Parts {
 				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
 					p.Lines[lineIndex].Parts[partIndex].Chord.StepUp()
@@ -310,6 +311,10 @@ func (p *ParsedContent) TransposeUpOneStep() {
 
 					if len(newLetters) > len(p.Lines[lineIndex].Parts[partIndex].Chord.OriginalString) {
 						longer = append(longer, partIndex)
+					} else {
+						if len(newLetters) < len(p.Lines[lineIndex].Parts[partIndex].Chord.OriginalString) {
+							shorter = append(shorter, partIndex)
+						}
 					}
 				}
 			}
@@ -322,6 +327,12 @@ func (p *ParsedContent) TransposeUpOneStep() {
 							p.Lines[lineIndex].Parts[index+1].Letters = p.Lines[lineIndex].Parts[index+1].Letters[1:]
 						}
 					}
+				}
+			}
+
+			for _, index := range shorter {
+				if index < len(p.Lines[lineIndex].Parts)-1 {
+					p.Lines[lineIndex].Parts[index].TransposedLetters = p.Lines[lineIndex].Parts[index].TransposedLetters + " "
 				}
 			}
 		}
@@ -338,6 +349,7 @@ func (p *ParsedContent) TransposeDownOneStep() {
 			}
 
 			longer := make([]int, 0)
+			shorter := make([]int, 0)
 			for partIndex := range p.Lines[lineIndex].Parts {
 				if p.Lines[lineIndex].Parts[partIndex].Type == LetterRunTypes.CHORDRUN {
 					p.Lines[lineIndex].Parts[partIndex].Chord.StepDown()
@@ -346,6 +358,10 @@ func (p *ParsedContent) TransposeDownOneStep() {
 
 					if len(newLetters) > len(p.Lines[lineIndex].Parts[partIndex].Chord.OriginalString) {
 						longer = append(longer, partIndex)
+					} else {
+						if len(newLetters) < len(p.Lines[lineIndex].Parts[partIndex].Chord.OriginalString) {
+							shorter = append(shorter, partIndex)
+						}
 					}
 				}
 			}
@@ -358,6 +374,12 @@ func (p *ParsedContent) TransposeDownOneStep() {
 							p.Lines[lineIndex].Parts[index+1].Letters = p.Lines[lineIndex].Parts[index+1].Letters[1:]
 						}
 					}
+				}
+			}
+
+			for _, index := range shorter {
+				if index < len(p.Lines[lineIndex].Parts)-1 {
+					p.Lines[lineIndex].Parts[index].TransposedLetters = p.Lines[lineIndex].Parts[index].TransposedLetters + " "
 				}
 			}
 		}

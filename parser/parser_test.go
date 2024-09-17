@@ -331,6 +331,66 @@ func TestTransposeUpOneStep(t *testing.T) {
 	}
 }
 
+func TestTransposeUpOneStepGettingShorter(t *testing.T) {
+	parser := ParsedContent{}
+	longContent := "[Section]\n" +
+		"   C#  D#  F\n" +
+		"Foo lyric lyric\n" +
+		"A# - C|C# / / /| D# F\n"
+	err := parser.ParseContent(longContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.TransposeUpOneStep()
+
+	expected := []string{
+		"[Section]",
+		"   D   E   F#",
+		"Foo lyric lyric",
+		"B  - C#|D  / / /| E  F#",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
+func TestTransposeDownOneStepGettingShorter(t *testing.T) {
+	parser := ParsedContent{}
+	longContent := "[Section]\n" +
+		"   C#  D#  F\n" +
+		"Foo lyric lyric\n" +
+		"A# - C|C# / / /| D# F\n"
+	err := parser.ParseContent(longContent)
+	if err != nil {
+		t.Error(err)
+	}
+
+	parser.TransposeDownOneStep()
+
+	expected := []string{
+		"[Section]",
+		"   C   D   E",
+		"Foo lyric lyric",
+		"A  - B|C  / / /| D  E",
+	}
+
+	asString := make([]string, len(parser.Lines))
+	for index, line := range parser.Lines {
+		asString[index] = line.String()
+	}
+
+	if !reflect.DeepEqual(asString, expected) {
+		t.Errorf("Expected:\n'%#v'\ngot:\n'%#v'", expected, asString)
+	}
+}
+
 func TestTransposeDownOneStep(t *testing.T) {
 	parser := ParsedContent{}
 	err := parser.ParseContent(content)
